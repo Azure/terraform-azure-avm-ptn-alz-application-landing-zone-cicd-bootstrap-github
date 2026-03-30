@@ -37,13 +37,13 @@ provider "github" {
   owner = var.organization_name
 }
 
-# This is the module call
+# GitHub-hosted runners with Terraform workflows (no self-hosted infra)
 module "test" {
   source = "../../"
 
-  # source             = "Azure/avm-ptn-alz-application-landing-zone-cicd-bootstrap-github/azurerm"
-  location            = var.location
-  organization_name   = var.organization_name
-  enable_telemetry    = var.enable_telemetry
-  example_module_path = "examples/terraform-example-module"
+  location               = var.location
+  organization_name      = var.organization_name
+  enable_telemetry       = var.enable_telemetry
+  example_module_path    = "examples/terraform-example-module"
+  use_self_hosted_agents = false
 }
