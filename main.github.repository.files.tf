@@ -27,8 +27,7 @@ locals {
     environments                     = local.environment_replacements
     organization_name                = var.github_organization_name
     repository_name_templates        = local.effective_template_repo_name
-    cd_template_path                 = local.effective_cd_template_path
-    ci_template_path                 = local.effective_ci_template_path
+    workflows                        = local.effective_workflows
     root_module_folder_relative_path = "."
     deployments                      = var.bicep_deployments != null ? var.bicep_deployments : []
   }

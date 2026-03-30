@@ -26,7 +26,7 @@ jobs:
 
 %{ for environment in environments ~}
   ${environment.name}_plan:
-    uses: ${organization_name}/${repository_name_templates}/${ci_template_path}@main
+    uses: ${organization_name}/${repository_name_templates}/${workflows["ci"].template_path}@main
     name: ${environment.display_name}
     needs: validate
     permissions:

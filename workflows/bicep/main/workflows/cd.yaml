@@ -27,7 +27,7 @@ on:
 jobs:
 %{ for environment in environments ~}
   ${environment.name}_what_if_and_deploy:
-    uses: ${organization_name}/${repository_name_templates}/${cd_template_path}@main
+    uses: ${organization_name}/${repository_name_templates}/${workflows["cd"].template_path}@main
     name: ${environment.display_name}
     ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_what_if_and_deploy"}
     if: ${environment.dependent_environment == "" ? "$${{ (inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}' }}" : "$${{ always() && ((inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}') && (needs.${environment.dependent_environment}_what_if_and_deploy.result == 'success' || needs.${environment.dependent_environment}_what_if_and_deploy.result == 'skipped') }}"}

@@ -55,14 +55,18 @@ variable "github_workflow_folder_path" {
   description = "The relative path to the folder containing workflow YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates."
 }
 
-variable "github_ci_template_path" {
-  type        = string
+variable "github_workflows" {
+  type = map(object({
+    main_file     = string
+    template_path = string
+  }))
   default     = null
-  description = "The path to the CI template within the template repository. When null, defaults to '.github/workflows/ci-template.yaml'."
-}
-
-variable "github_cd_template_path" {
-  type        = string
-  default     = null
-  description = "The path to the CD template within the template repository. When null, defaults to '.github/workflows/cd-template.yaml'."
+  description = <<DESCRIPTION
+A map of workflows to create in the main repository. Each key is the workflow name, and the value specifies:
+- `main_file` - The source YAML file name within the workflow folder's main/ directory.
+- `template_path` - The path to the template within the template repository.
+When null, defaults based on deployment_mode:
+  terraform: { ci = { main_file = "workflows/ci.yaml", template_path = ".github/workflows/ci-template.yaml" }, cd = { main_file = "workflows/cd.yaml", template_path = ".github/workflows/cd-template.yaml" } }
+  bicep: same structure
+DESCRIPTION
 }
