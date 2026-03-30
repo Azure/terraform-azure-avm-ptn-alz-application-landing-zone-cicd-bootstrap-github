@@ -34,7 +34,7 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = var.organization_name
+  owner = var.github_organization_name
 }
 
 # This is the module call
@@ -43,7 +43,7 @@ module "test" {
 
   # source             = "Azure/avm-ptn-alz-application-landing-zone-cicd-bootstrap-github/azurerm"
   location            = var.location
-  organization_name   = var.organization_name
+  github_organization_name   = var.github_organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/terraform-example-module"
 }

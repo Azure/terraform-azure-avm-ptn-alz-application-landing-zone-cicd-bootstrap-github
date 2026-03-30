@@ -9,7 +9,7 @@ data "azapi_resource_action" "current_subscription" {
 }
 
 data "github_organization" "this" {
-  name = var.organization_name
+  name = var.github_organization_name
 }
 
 module "regions" {

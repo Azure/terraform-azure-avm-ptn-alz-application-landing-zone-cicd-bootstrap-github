@@ -34,7 +34,7 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = var.organization_name
+  owner = var.github_organization_name
 }
 
 # BYO runner group with Terraform workflows (no self-hosted infra created)
@@ -42,8 +42,8 @@ module "test" {
   source = "../../"
 
   location            = var.location
-  organization_name   = var.organization_name
+  github_organization_name   = var.github_organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/terraform-example-module"
-  existing_runner_group_name = "my-existing-runner-group"
+  runner_existing_group_name = "my-existing-runner-group"
 }

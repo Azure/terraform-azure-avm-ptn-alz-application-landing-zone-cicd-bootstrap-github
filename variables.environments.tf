@@ -57,7 +57,7 @@ variable "approvers" {
   default     = {}
 }
 
-variable "existing_approvers_team_id" {
+variable "github_existing_approvers_team_id" {
   type        = number
   default     = null
   description = "The ID of a pre-existing GitHub team to use for environment approvals (BYO mode). When set, the module will not create an approval team or look up approver users."

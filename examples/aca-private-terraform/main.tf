@@ -34,7 +34,7 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = var.organization_name
+  owner = var.github_organization_name
 }
 
 # ACA with private networking and Terraform workflows
@@ -42,9 +42,9 @@ module "test" {
   source = "../../"
 
   location               = var.location
-  organization_name      = var.organization_name
+  github_organization_name      = var.github_organization_name
   enable_telemetry       = var.enable_telemetry
   example_module_path    = "examples/terraform-example-module"
   compute_type = "azure_container_app"
-  use_self_hosted_agents = true
+  runner_use_self_hosted = true
 }

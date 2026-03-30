@@ -1,6 +1,6 @@
 # --- Repositories ---
 
-variable "existing_template_repository_name" {
+variable "github_existing_template_repository_name" {
   type        = string
   default     = null
   description = "The name of a pre-existing template repository containing CI/CD workflow templates (BYO mode). When set, the module will not create a template repository or push template files."
@@ -49,19 +49,19 @@ DESCRIPTION
 
 # --- Workflow Templates ---
 
-variable "workflow_folder_path" {
+variable "github_workflow_folder_path" {
   type        = string
   default     = null
   description = "The relative path to the folder containing workflow YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates."
 }
 
-variable "ci_template_path" {
+variable "github_ci_template_path" {
   type        = string
   default     = null
   description = "The path to the CI template within the template repository. When null, defaults to '.github/workflows/ci-template.yaml'."
 }
 
-variable "cd_template_path" {
+variable "github_cd_template_path" {
   type        = string
   default     = null
   description = "The path to the CD template within the template repository. When null, defaults to '.github/workflows/cd-template.yaml'."

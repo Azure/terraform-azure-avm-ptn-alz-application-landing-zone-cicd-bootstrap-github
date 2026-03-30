@@ -2,7 +2,7 @@ locals {
   primary_approver     = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
   default_commit_email = coalesce(local.primary_approver, "demouser@example.com")
 
-  self_hosted_runner_name = var.existing_runner_group_name != null ? "group: ${var.existing_runner_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
+  self_hosted_runner_name = var.runner_existing_group_name != null ? "group: ${var.runner_existing_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
 
   target_folder_name = ".github"
 
@@ -25,7 +25,7 @@ locals {
 
   pipeline_main_replacements = {
     environments                     = local.environment_replacements
-    organization_name                = var.organization_name
+    organization_name                = var.github_organization_name
     repository_name_templates        = local.effective_template_repo_name
     cd_template_path                 = local.effective_cd_template_path
     ci_template_path                 = local.effective_ci_template_path
@@ -33,7 +33,7 @@ locals {
     deployments                      = var.bicep_deployments != null ? var.bicep_deployments : []
   }
 
-  effective_workflow_folder = var.workflow_folder_path != null ? var.workflow_folder_path : (
+  effective_workflow_folder = var.github_workflow_folder_path != null ? var.github_workflow_folder_path : (
     contains(["terraform", "bicep"], var.deployment_mode) ? "workflows/${var.deployment_mode}" : null
   )
 

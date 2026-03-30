@@ -12,12 +12,12 @@ variable "location" {
   }
 }
 
-variable "organization_name" {
+variable "github_organization_name" {
   type        = string
   description = "The name of the GitHub organization."
 }
 
-variable "personal_access_token" {
+variable "runner_personal_access_token" {
   type        = string
   default     = null
   description = "The personal access token for the GitHub organization. Required for the GitHub provider if not set via the GITHUB_TOKEN environment variable. Also required for runner authentication when `runner_authentication_method` is 'pat'."

@@ -9,7 +9,7 @@ module "user_assigned_managed_identity" {
 }
 
 locals {
-  template_claim_structure = "${var.organization_name}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
+  template_claim_structure = "${var.github_organization_name}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
 
   federated_credentials = { for federated_credential in flatten([for env_key, env_value in local.environment_split : [
     for template in env_value.required_templates : {
@@ -23,7 +23,7 @@ locals {
 resource "azapi_resource" "federated_identity_credential" {
   for_each  = local.federated_credentials
   type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31"
-  name      = lower(replace("${var.organization_name}-${each.key}", ".", "-"))
+  name      = lower(replace("${var.github_organization_name}-${each.key}", ".", "-"))
   parent_id = each.value.user_assigned_managed_identity_id
   body = {
     properties = {
