@@ -10,8 +10,8 @@ locals {
     name                                         = lower(replace(environment_key, "-", ""))
     display_name                                 = environment_value.display_name
     runner_name                                  = local.is_self_hosted ? local.self_hosted_runner_name : "ubuntu-latest"
-    environment_name_plan                        = "${environment_key}-plan"
-    environment_name_apply                       = "${environment_key}-apply"
+    environment_name_read                        = "${environment_key}-read"
+    environment_name_write                       = "${environment_key}-write"
     dependent_environment                        = environment_value.dependent_environment
     backend_azure_storage_account_container_name = environment_key
   } }

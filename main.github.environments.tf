@@ -1,5 +1,5 @@
 locals {
-  apply_key = "apply"
+  write_key = "write"
 }
 
 resource "github_repository_environment" "this" {
@@ -8,7 +8,7 @@ resource "github_repository_environment" "this" {
   repository  = github_repository.this.name
 
   dynamic "reviewers" {
-    for_each = each.value.type == local.apply_key && each.value.has_approval && local.has_approvers ? [1] : []
+    for_each = each.value.type == local.write_key && each.value.has_approval && local.has_approvers ? [1] : []
     content {
       teams = [
         local.effective_approvers_team_id
@@ -17,7 +17,7 @@ resource "github_repository_environment" "this" {
   }
 
   dynamic "deployment_branch_policy" {
-    for_each = each.value.type == local.apply_key ? [1] : []
+    for_each = each.value.type == local.write_key ? [1] : []
     content {
       protected_branches     = true
       custom_branch_policies = false

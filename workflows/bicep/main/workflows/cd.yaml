@@ -39,8 +39,8 @@ jobs:
       name: ${environment.name}
       display_name: ${environment.display_name}
       runner_name: ${environment.runner_name}
-      environment_name_plan: ${environment.environment_name_plan}
-      environment_name_apply: ${environment.environment_name_apply}
+      environment_name_read: ${environment.environment_name_read}
+      environment_name_write: ${environment.environment_name_write}
       dependent_environment: ${environment.dependent_environment}
       backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
       deployments_json: '${jsonencode(deployments)}'

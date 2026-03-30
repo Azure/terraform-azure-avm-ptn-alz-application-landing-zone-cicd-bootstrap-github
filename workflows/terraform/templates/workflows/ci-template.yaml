@@ -15,11 +15,11 @@ on:
         description: 'Runner Name'
         type: string
         default: ''
-      environment_name_plan:
+      environment_name_read:
         description: 'Environment Name Plan'
         type: string
         default: ''
-      environment_name_apply:
+      environment_name_write:
         description: 'Environment Name Apply'
         type: string
         default: ''
@@ -46,7 +46,7 @@ jobs:
     runs-on:
       ${{ inputs.runner_name }}
     concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
-    environment: ${{ inputs.environment_name_plan }}
+    environment: ${{ inputs.environment_name_read }}
     permissions:
       id-token: write
       contents: read
