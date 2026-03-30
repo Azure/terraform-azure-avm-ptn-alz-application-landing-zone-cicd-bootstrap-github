@@ -20,11 +20,16 @@ locals {
   ]]) : federated_credential.composite_key => federated_credential }
 }
 
-resource "azurerm_federated_identity_credential" "this" {
+resource "azapi_resource" "federated_identity_credential" {
   for_each  = local.federated_credentials
-  parent_id = each.value.user_assigned_managed_identity_id
+  type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31"
   name      = lower(replace("${var.organization_name}-${each.key}", ".", "-"))
-  audience  = [local.default_audience_name]
-  issuer    = local.github_issuer_url
-  subject   = each.value.subject
+  parent_id = each.value.user_assigned_managed_identity_id
+  body = {
+    properties = {
+      audiences = [local.default_audience_name]
+      issuer    = local.github_issuer_url
+      subject   = each.value.subject
+    }
+  }
 }
