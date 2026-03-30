@@ -23,7 +23,7 @@ locals {
 resource "azapi_resource" "federated_identity_credential" {
   for_each  = local.federated_credentials
   type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31"
-  name      = lower(replace("${var.github_organization_name}-${each.key}", ".", "-"))
+  name      = each.value.federated_credential_name
   parent_id = each.value.user_assigned_managed_identity_id
   body = {
     properties = {

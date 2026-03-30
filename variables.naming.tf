@@ -70,5 +70,6 @@ variable "resource_name_templates" {
     repository_template_name              = "$${workload}-$${environment}-template"
     runner_group_name                     = "runner-group-$${workload}-$${environment}"
     team_name                             = "team-$${workload}-$${environment}-approvers"
+    federated_credential_name             = "$${workload}-$${environment}"
   }
 }
