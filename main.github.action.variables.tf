@@ -55,3 +55,11 @@ resource "github_actions_environment_variable" "var_file" {
   variable_name = "VAR_FILE_PATH"
   value         = "./config/${each.value.environment}.tfvars"
 }
+
+resource "github_actions_environment_variable" "bicep_deployments" {
+  for_each      = var.deployment_mode == "bicep" ? local.environment_split : {}
+  repository    = github_repository.this.name
+  environment   = github_repository_environment.this[each.key].environment
+  variable_name = "BICEP_DEPLOYMENTS"
+  value         = var.bicep_deployments != null ? jsonencode(var.bicep_deployments) : "[]"
+}

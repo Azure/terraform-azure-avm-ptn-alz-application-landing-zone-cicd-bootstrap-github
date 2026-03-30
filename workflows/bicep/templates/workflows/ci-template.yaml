@@ -38,7 +38,7 @@ on:
 
 jobs:
   validate:
-    name: Validate Bicep Deployment
+    name: Validate Bicep Deployment Stacks
     runs-on:
       ${{ inputs.runner_name }}
     concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
@@ -57,18 +57,36 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Validate Bicep Deployment
+      - name: Validate Bicep Deployment Stacks
         shell: pwsh
         run: |
-          $varFilePath = "${{ vars.VAR_FILE_PATH }}"
-          $arguments = @(
-            "deployment", "group", "validate",
-            "--resource-group", "${{ vars.RESOURCE_GROUP_NAME }}",
-            "--template-file", "${{ inputs.root_module_folder_relative_path }}/main.bicep"
-          )
-          if($varFilePath -ne "") {
-            $arguments += "--parameters"
-            $arguments += "@$varFilePath"
+          $deploymentsJson = $env:BICEP_DEPLOYMENTS
+          if([string]::IsNullOrEmpty($deploymentsJson)) {
+            Write-Host "No BICEP_DEPLOYMENTS variable set, skipping validation"
+            return
           }
-          Write-Host "Running: az $arguments"
-          az @arguments
+          $deployments = ConvertFrom-Json $deploymentsJson
+          foreach($deployment in $deployments) {
+            Write-Host "--- Validating deployment stack: $($deployment.name) ---"
+            $scope = if($deployment.scope) { $deployment.scope } else { "group" }
+            $templateFile = "${{ inputs.root_module_folder_relative_path }}/$($deployment.template_file)"
+            $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+
+            switch($scope) {
+              "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
+              "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
+              "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
+            }
+
+            $arguments += @("--template-file", $templateFile)
+            if($deployment.parameters_file) {
+              $paramsFile = "${{ inputs.root_module_folder_relative_path }}/$($deployment.parameters_file)"
+              $arguments += @("--parameters", "@$paramsFile")
+            }
+            $arguments += "--what-if"
+            Write-Host "Running: az $arguments"
+            az @arguments
+            if($LASTEXITCODE -ne 0) { throw "Validation failed for deployment stack: $($deployment.name)" }
+          }
+        env:
+          BICEP_DEPLOYMENTS: ${{ vars.BICEP_DEPLOYMENTS }}

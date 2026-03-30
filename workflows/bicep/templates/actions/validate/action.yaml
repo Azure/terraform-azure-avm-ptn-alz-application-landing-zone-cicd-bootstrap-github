@@ -15,4 +15,13 @@ runs:
     - name: Bicep Build (Validate)
       shell: pwsh
       run: |
-        az bicep build --file "${{inputs.root_module_folder_relative_path}}/main.bicep"
+        $deploymentsJson = $env:BICEP_DEPLOYMENTS
+        if([string]::IsNullOrEmpty($deploymentsJson)) {
+          az bicep build --file "${{inputs.root_module_folder_relative_path}}/main.bicep"
+        } else {
+          $deployments = ConvertFrom-Json $deploymentsJson
+          foreach($deployment in $deployments) {
+            Write-Host "Validating: $($deployment.template_file)"
+            az bicep build --file "${{inputs.root_module_folder_relative_path}}/$($deployment.template_file)"
+          }
+        }
