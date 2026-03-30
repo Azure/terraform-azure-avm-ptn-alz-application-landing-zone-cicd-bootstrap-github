@@ -6,5 +6,5 @@ resource "github_actions_runner_group" "this" {
   count                   = local.use_runner_group ? 1 : 0
   name                    = local.resource_names.runner_group_name
   visibility              = "selected"
-  selected_repository_ids = [github_repository.this.repo_id, github_repository.template.repo_id]
+  selected_repository_ids = compact([github_repository.this.repo_id, local.create_template_repository ? github_repository.template[0].repo_id : ""])
 }

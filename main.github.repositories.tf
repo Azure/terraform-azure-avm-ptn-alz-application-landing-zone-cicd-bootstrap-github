@@ -21,6 +21,7 @@ resource "github_actions_repository_oidc_subject_claim_customization_template" "
 }
 
 resource "github_repository" "template" {
+  count                = local.create_template_repository ? 1 : 0
   name                 = local.resource_names.repository_template_name
   description          = local.resource_names.repository_template_name
   auto_init            = true
@@ -47,8 +48,9 @@ resource "github_branch_protection" "this" {
 }
 
 resource "github_branch_protection" "template" {
+  count                           = local.create_template_repository ? 1 : 0
   depends_on                      = [github_repository_file.template]
-  repository_id                   = github_repository.template.name
+  repository_id                   = github_repository.template[0].name
   pattern                         = "main"
   enforce_admins                  = true
   required_linear_history         = true
@@ -62,7 +64,7 @@ resource "github_branch_protection" "template" {
 }
 
 resource "github_actions_repository_access_level" "this" {
-  count        = data.github_organization.this.plan == local.enterprise_plan ? 1 : 0
+  count        = local.create_template_repository && data.github_organization.this.plan == local.enterprise_plan ? 1 : 0
   access_level = "organization"
-  repository   = github_repository.template.name
+  repository   = github_repository.template[0].name
 }

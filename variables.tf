@@ -255,6 +255,24 @@ variable "tags" {
   description = "(Optional) Tags of the resource."
 }
 
+variable "template_repository_name" {
+  type        = string
+  default     = null
+  description = "The name of a pre-existing template repository containing CI/CD workflow templates (BYO mode). When set, the module will not create a template repository or push template files. The workflow YAML in the main repository will reference this repository for templates."
+}
+
+variable "ci_template_path" {
+  type        = string
+  default     = null
+  description = "The path to the CI template within the template repository. When null, defaults to '.github/workflows/ci-template.yaml'."
+}
+
+variable "cd_template_path" {
+  type        = string
+  default     = null
+  description = "The path to the CD template within the template repository. When null, defaults to '.github/workflows/cd-template.yaml'."
+}
+
 variable "use_runner_group" {
   type        = bool
   description = "Whether to use a runner group for the self-hosted agents."

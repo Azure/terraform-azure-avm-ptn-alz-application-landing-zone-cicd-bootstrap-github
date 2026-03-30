@@ -9,7 +9,7 @@ module "user_assigned_managed_identity" {
 }
 
 locals {
-  template_claim_structure = "${var.organization_name}/${local.resource_names.repository_template_name}/.github/workflows/%s@refs/heads/main"
+  template_claim_structure = "${var.organization_name}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
 
   federated_credentials = { for federated_credential in flatten([for env_key, env_value in local.environment_split : [
     for template in env_value.required_templates : {
