@@ -2,7 +2,7 @@ locals {
   primary_approver     = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
   default_commit_email = coalesce(local.primary_approver, "demouser@example.com")
 
-  self_hosted_runner_name = var.runner_group_name != null ? "group: ${var.runner_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
+  self_hosted_runner_name = var.existing_runner_group_name != null ? "group: ${var.existing_runner_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
 
   target_folder_name = ".github"
 

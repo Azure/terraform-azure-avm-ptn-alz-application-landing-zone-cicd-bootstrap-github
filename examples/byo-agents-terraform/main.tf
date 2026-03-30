@@ -45,5 +45,5 @@ module "test" {
   organization_name   = var.organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/terraform-example-module"
-  runner_group_name   = "my-existing-runner-group"
+  existing_runner_group_name = "my-existing-runner-group"
 }

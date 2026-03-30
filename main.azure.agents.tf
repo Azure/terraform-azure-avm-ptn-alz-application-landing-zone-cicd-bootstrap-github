@@ -10,7 +10,7 @@ module "azure_devops_agents" {
   container_instance_name_prefix                = local.resource_names.container_instance_prefix_name
   container_registry_name                       = local.resource_names.container_registry_name
   location                                      = var.location
-  compute_types                                 = [var.self_hosted_agent_type]
+  compute_types                                 = [var.compute_type]
   container_instance_count                      = 4
   version_control_system_type                           = "github"
   version_control_system_authentication_method           = var.runner_authentication_method
@@ -27,6 +27,6 @@ module "azure_devops_agents" {
   container_app_subnet_id                       = local.effective_agents_subnet_id
   container_instance_subnet_id                  = local.effective_agents_subnet_id
   container_registry_private_endpoint_subnet_id = local.effective_pe_subnet_id
-  container_instance_use_availability_zones     = var.runner_use_availability_zones
+  container_instance_use_availability_zones     = var.compute_use_availability_zones
   depends_on                                    = [github_repository_file.this]
 }

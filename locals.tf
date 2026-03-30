@@ -15,20 +15,20 @@ locals {
 locals {
   default_audience_name       = "api://AzureADTokenExchange"
   github_issuer_url           = "https://token.actions.githubusercontent.com"
-  create_agent_infrastructure = var.use_self_hosted_agents && var.runner_group_name == null
-  create_vnet_infrastructure  = local.create_agent_infrastructure && var.virtual_network_resource_id == null
-  is_self_hosted              = var.use_self_hosted_agents || var.runner_group_name != null
-  effective_vnet_resource_id  = var.virtual_network_resource_id != null ? var.virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
-  effective_agents_subnet_id  = var.agents_subnet_resource_id != null ? var.agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
-  effective_pe_subnet_id      = var.private_endpoints_subnet_resource_id != null ? var.private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
+  create_agent_infrastructure = var.use_self_hosted_agents && var.existing_runner_group_name == null
+  create_vnet_infrastructure  = local.create_agent_infrastructure && var.existing_virtual_network_resource_id == null
+  is_self_hosted              = var.use_self_hosted_agents || var.existing_runner_group_name != null
+  effective_vnet_resource_id  = var.existing_virtual_network_resource_id != null ? var.existing_virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
+  effective_agents_subnet_id  = var.existing_agents_subnet_resource_id != null ? var.existing_agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
+  effective_pe_subnet_id      = var.existing_private_endpoints_subnet_resource_id != null ? var.existing_private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
   use_private_networking      = local.effective_vnet_resource_id != null
-  create_template_repository  = var.template_repository_name == null
-  effective_template_repo_name = var.template_repository_name != null ? var.template_repository_name : github_repository.template[0].name
+  create_template_repository  = var.existing_template_repository_name == null
+  effective_template_repo_name = var.existing_template_repository_name != null ? var.existing_template_repository_name : github_repository.template[0].name
   effective_ci_template_path  = coalesce(var.ci_template_path, ".github/workflows/ci-template.yaml")
   effective_cd_template_path  = coalesce(var.cd_template_path, ".github/workflows/cd-template.yaml")
-  create_approval_team        = var.approvers_team_id == null && length(var.approvers) > 0
-  effective_approvers_team_id = var.approvers_team_id != null ? var.approvers_team_id : (local.create_approval_team ? github_team.this[0].id : null)
-  has_approvers               = var.approvers_team_id != null || length(var.approvers) > 0
+  create_approval_team        = var.existing_approvers_team_id == null && length(var.approvers) > 0
+  effective_approvers_team_id = var.existing_approvers_team_id != null ? var.existing_approvers_team_id : (local.create_approval_team ? github_team.this[0].id : null)
+  has_approvers               = var.existing_approvers_team_id != null || length(var.approvers) > 0
 }
 
 locals {
