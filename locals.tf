@@ -13,8 +13,10 @@ locals {
 }
 
 locals {
-  default_audience_name = "api://AzureADTokenExchange"
-  github_issuer_url     = "https://token.actions.githubusercontent.com"
+  default_audience_name       = "api://AzureADTokenExchange"
+  github_issuer_url           = "https://token.actions.githubusercontent.com"
+  create_agent_infrastructure = var.use_self_hosted_agents && var.runner_group_name == null
+  is_self_hosted              = var.use_self_hosted_agents || var.runner_group_name != null
 }
 
 locals {

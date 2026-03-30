@@ -2,14 +2,14 @@ locals {
   primary_approver     = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
   default_commit_email = coalesce(local.primary_approver, "demouser@example.com")
 
-  self_hosted_runner_name = local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted"
+  self_hosted_runner_name = var.runner_group_name != null ? "group: ${var.runner_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
 
   target_folder_name = ".github"
 
   environment_replacements = { for environment_key, environment_value in local.environments : "${format("%03s", environment_value.display_order)}-${environment_key}" => {
     name                                         = lower(replace(environment_key, "-", ""))
     display_name                                 = environment_value.display_name
-    runner_name                                  = var.use_self_hosted_agents ? local.self_hosted_runner_name : "ubuntu-latest"
+    runner_name                                  = local.is_self_hosted ? local.self_hosted_runner_name : "ubuntu-latest"
     environment_name_plan                        = "${environment_key}-plan"
     environment_name_apply                       = "${environment_key}-apply"
     dependent_environment                        = environment_value.dependent_environment

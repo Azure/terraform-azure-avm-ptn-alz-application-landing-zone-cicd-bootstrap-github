@@ -193,6 +193,12 @@ variable "resource_name_workload" {
   }
 }
 
+variable "runner_group_name" {
+  type        = string
+  default     = null
+  description = "The name of a pre-existing GitHub Actions runner group to use (BYO mode). When set, the module will not create a runner group or any Azure compute infrastructure for runners. The provided group name will be used in workflow YAML files."
+}
+
 variable "runner_use_availability_zones" {
   type        = bool
   default     = false
