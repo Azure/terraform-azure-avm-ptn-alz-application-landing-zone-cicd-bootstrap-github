@@ -23,15 +23,15 @@ resource "github_actions_environment_variable" "azure_tenant_id" {
 }
 
 resource "github_actions_environment_variable" "backend_azure_storage_account_name" {
-  for_each      = local.environment_split
+  for_each      = var.deployment_mode == "terraform" ? local.environment_split : {}
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "BACKEND_AZURE_STORAGE_ACCOUNT_NAME"
-  value         = module.storage_account.name
+  value         = module.storage_account[0].name
 }
 
 resource "github_actions_environment_variable" "backend_azure_storage_account_container_name" {
-  for_each      = local.environment_split
+  for_each      = var.deployment_mode == "terraform" ? local.environment_split : {}
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME"
@@ -39,7 +39,7 @@ resource "github_actions_environment_variable" "backend_azure_storage_account_co
 }
 
 resource "github_actions_environment_variable" "additional_variables" {
-  for_each      = local.environment_split
+  for_each      = var.deployment_mode == "terraform" ? local.environment_split : {}
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "ADDITIONAL_ENVIRONMENT_VARIABLES"
@@ -49,7 +49,7 @@ resource "github_actions_environment_variable" "additional_variables" {
 }
 
 resource "github_actions_environment_variable" "var_file" {
-  for_each      = local.environment_split
+  for_each      = var.deployment_mode == "terraform" ? local.environment_split : {}
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "VAR_FILE_PATH"
