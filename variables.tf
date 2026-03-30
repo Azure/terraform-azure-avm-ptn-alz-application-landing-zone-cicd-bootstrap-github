@@ -199,6 +199,24 @@ variable "runner_group_name" {
   description = "The name of a pre-existing GitHub Actions runner group to use (BYO mode). When set, the module will not create a runner group or any Azure compute infrastructure for runners. The provided group name will be used in workflow YAML files."
 }
 
+variable "agents_subnet_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing subnet for agents/runners (BYO mode). When set along with `private_endpoints_subnet_resource_id`, the module will not create a virtual network. The subnet must have the appropriate delegation for the chosen `self_hosted_agent_type`."
+}
+
+variable "private_endpoints_subnet_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing subnet for private endpoints (BYO mode). When set along with `agents_subnet_resource_id`, the module will not create a virtual network."
+}
+
+variable "virtual_network_resource_id" {
+  type        = string
+  default     = null
+  description = "The resource ID of a pre-existing virtual network to use (BYO mode). Must be set together with `agents_subnet_resource_id` and `private_endpoints_subnet_resource_id`. When set, the module will not create a virtual network or agents resource group."
+}
+
 variable "runner_use_availability_zones" {
   type        = bool
   default     = false

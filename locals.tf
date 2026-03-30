@@ -16,7 +16,12 @@ locals {
   default_audience_name       = "api://AzureADTokenExchange"
   github_issuer_url           = "https://token.actions.githubusercontent.com"
   create_agent_infrastructure = var.use_self_hosted_agents && var.runner_group_name == null
+  create_vnet_infrastructure  = local.create_agent_infrastructure && var.virtual_network_resource_id == null
   is_self_hosted              = var.use_self_hosted_agents || var.runner_group_name != null
+  effective_vnet_resource_id  = var.virtual_network_resource_id != null ? var.virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
+  effective_agents_subnet_id  = var.agents_subnet_resource_id != null ? var.agents_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["agents"].resource_id : null)
+  effective_pe_subnet_id      = var.private_endpoints_subnet_resource_id != null ? var.private_endpoints_subnet_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].subnets["private_endpoints"].resource_id : null)
+  use_private_networking      = local.effective_vnet_resource_id != null
 }
 
 locals {
