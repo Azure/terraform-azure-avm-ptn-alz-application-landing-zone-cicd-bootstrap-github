@@ -1,0 +1,55 @@
+---
+name: 02 Continuous Delivery
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose Environment'
+        required: true
+        default: 'All'
+        type: choice
+        options:
+          - 'All'
+%{ for environment in environments ~}
+          - ${environment.name}
+%{ endfor ~}
+      terraform_action:
+        description: 'Terraform Action to perform'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - 'apply'
+          - 'destroy'
+      terraform_cli_version:
+        description: 'Terraform CLI Version'
+        required: true
+        default: 'latest'
+        type: string
+
+jobs:
+%{ for environment in environments ~}
+  ${environment.name}_plan_and_apply:
+    uses: ${organization_name}/${repository_name_templates}/${cd_template_path}@main
+    name: ${environment.display_name}
+    ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_plan_and_apply"}
+    if: ${environment.dependent_environment == "" ? "$${{ (inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}' }}" : "$${{ always() && ((inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}') && (needs.${environment.dependent_environment}_plan_and_apply.result == 'success' || needs.${environment.dependent_environment}_plan_and_apply.result == 'skipped') }}"}
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      terraform_action: $${{ inputs.terraform_action }}
+      root_module_folder_relative_path: '${root_module_folder_relative_path}'
+      name: ${environment.name}
+      display_name: ${environment.display_name}
+      runner_name: ${environment.runner_name}
+      environment_name_plan: ${environment.environment_name_plan}
+      environment_name_apply: ${environment.environment_name_apply}
+      dependent_environment: ${environment.dependent_environment}
+      backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+      terraform_cli_version: $${{ inputs.terraform_cli_version }}
+
+%{ endfor ~}

@@ -1,6 +1,24 @@
-output "private_endpoints" {
-  description = <<DESCRIPTION
-  A map of the private endpoints created.
-  DESCRIPTION
-  value       = var.private_endpoints_manage_dns_zone_group ? azurerm_private_endpoint.this_managed_dns_zone_groups : azurerm_private_endpoint.this_unmanaged_dns_zone_groups
+output "apply_approvers" {
+  description = "The list of approvers matched from the organization."
+  value       = local.approvers
+}
+
+output "managed_identity_client_ids" {
+  description = "A map of managed identity client IDs for each environment split."
+  value       = { for env_key, env_value in local.environment_split : env_key => module.user_assigned_managed_identity[env_key].client_id }
+}
+
+output "subscription_id" {
+  description = "The subscription ID."
+  value       = data.azurerm_client_config.current.subscription_id
+}
+
+output "subscription_name" {
+  description = "The subscription display name."
+  value       = data.azurerm_subscription.current.display_name
+}
+
+output "tenant_id" {
+  description = "The tenant ID."
+  value       = data.azurerm_client_config.current.tenant_id
 }

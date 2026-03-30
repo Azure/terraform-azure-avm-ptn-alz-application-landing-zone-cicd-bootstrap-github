@@ -6,10 +6,13 @@ terraform {
       source  = "Azure/azapi"
       version = "~> 2.4"
     }
-    # TODO: Ensure all required providers are listed here and the version property includes a constraint on the maximum major version.
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "~> 6.5"
     }
     modtm = {
       source  = "azure/modtm"
