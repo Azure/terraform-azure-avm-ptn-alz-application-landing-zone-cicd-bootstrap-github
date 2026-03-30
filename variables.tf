@@ -28,6 +28,12 @@ variable "address_space" {
   default     = "10.0.0.0/24"
 }
 
+variable "alz_platform_landing_zone_mode_enabled" {
+  type        = bool
+  default     = false
+  description = "When enabled, the module will not create private DNS zones and will not manage DNS zone groups for private endpoints. This is useful when the platform landing zone is managing DNS zones centrally via Azure Policy."
+}
+
 variable "approvers" {
   type        = map(string)
   description = "A map of approvers for the landing zone Terraform apply. The map key is the approver name and the value is the approver email or login."
