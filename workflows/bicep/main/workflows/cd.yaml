@@ -1,0 +1,47 @@
+---
+name: 02 Continuous Delivery
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose Environment'
+        required: true
+        default: 'All'
+        type: choice
+        options:
+          - 'All'
+%{ for environment in environments ~}
+          - ${environment.name}
+%{ endfor ~}
+      bicep_action:
+        description: 'Bicep Action to perform'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+          - 'deploy'
+
+jobs:
+%{ for environment in environments ~}
+  ${environment.name}_what_if_and_deploy:
+    uses: ${organization_name}/${repository_name_templates}/${cd_template_path}@main
+    name: ${environment.display_name}
+    ${environment.dependent_environment == "" ? "" : "needs: ${environment.dependent_environment}_what_if_and_deploy"}
+    if: ${environment.dependent_environment == "" ? "$${{ (inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}' }}" : "$${{ always() && ((inputs.environment || 'All') == 'All' || (inputs.environment || 'All') == '${environment.name}') && (needs.${environment.dependent_environment}_what_if_and_deploy.result == 'success' || needs.${environment.dependent_environment}_what_if_and_deploy.result == 'skipped') }}"}
+    permissions:
+      id-token: write
+      contents: read
+    with:
+      root_module_folder_relative_path: '${root_module_folder_relative_path}'
+      name: ${environment.name}
+      display_name: ${environment.display_name}
+      runner_name: ${environment.runner_name}
+      environment_name_plan: ${environment.environment_name_plan}
+      environment_name_apply: ${environment.environment_name_apply}
+      dependent_environment: ${environment.dependent_environment}
+      backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+
+%{ endfor ~}

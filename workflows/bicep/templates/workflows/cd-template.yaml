@@ -1,0 +1,111 @@
+---
+name: Continuous Delivery
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: 'Environment Details'
+        type: string
+        default: ''
+      display_name:
+        description: 'Environment Display Name'
+        type: string
+        default: ''
+      runner_name:
+        description: 'Runner Name'
+        type: string
+        default: ''
+      environment_name_plan:
+        description: 'Environment Name Plan'
+        type: string
+        default: ''
+      environment_name_apply:
+        description: 'Environment Name Apply'
+        type: string
+        default: ''
+      dependent_environment:
+        description: 'Dependent Environment'
+        type: string
+        default: ''
+      backend_azure_storage_account_container_name:
+        description: 'Backend Azure Storage Account Container Name'
+        type: string
+        default: ''
+      root_module_folder_relative_path:
+        description: 'Root Module Folder Relative Path'
+        default: '.'
+        type: string
+
+jobs:
+  what_if:
+    name: What-If with Bicep
+    runs-on:
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    environment: ${{ inputs.environment_name_plan }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Bicep What-If
+        shell: pwsh
+        run: |
+          $varFilePath = "${{ vars.VAR_FILE_PATH }}"
+          $arguments = @(
+            "deployment", "group", "what-if",
+            "--resource-group", "${{ vars.RESOURCE_GROUP_NAME }}",
+            "--template-file", "${{ inputs.root_module_folder_relative_path }}/main.bicep"
+          )
+          if($varFilePath -ne "") {
+            $arguments += "--parameters"
+            $arguments += "@$varFilePath"
+          }
+          Write-Host "Running: az $arguments"
+          az @arguments
+
+  deploy:
+    name: Deploy with Bicep
+    needs: what_if
+    runs-on:
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    environment: ${{ inputs.environment_name_apply }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Bicep Deploy
+        shell: pwsh
+        run: |
+          $varFilePath = "${{ vars.VAR_FILE_PATH }}"
+          $arguments = @(
+            "deployment", "group", "create",
+            "--resource-group", "${{ vars.RESOURCE_GROUP_NAME }}",
+            "--template-file", "${{ inputs.root_module_folder_relative_path }}/main.bicep"
+          )
+          if($varFilePath -ne "") {
+            $arguments += "--parameters"
+            $arguments += "@$varFilePath"
+          }
+          Write-Host "Running: az $arguments"
+          az @arguments

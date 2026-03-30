@@ -22,6 +22,12 @@ variable "personal_access_token" {
   sensitive   = true
 }
 
+variable "workflow_folder_path" {
+  type        = string
+  default     = null
+  description = "The relative path to the folder containing workflow YAML files to use. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates."
+}
+
 variable "address_space" {
   type        = string
   description = "The virtual network address space."

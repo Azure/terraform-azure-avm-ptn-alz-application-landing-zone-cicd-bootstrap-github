@@ -1,0 +1,18 @@
+---
+name: Run Bicep Validate
+description: Run Bicep Validate
+inputs:
+  root_module_folder_relative_path:
+    description: 'Root Module Folder Relative Path'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Bicep Build (Validate)
+      shell: pwsh
+      run: |
+        az bicep build --file "${{inputs.root_module_folder_relative_path}}/main.bicep"

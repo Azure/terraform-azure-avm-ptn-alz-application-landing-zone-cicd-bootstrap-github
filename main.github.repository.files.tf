@@ -32,11 +32,15 @@ locals {
     root_module_folder_relative_path = "."
   }
 
-  pipeline_main_folder = "${path.module}/workflows/main"
-  pipeline_main_files = { for file in fileset(local.pipeline_main_folder, "**") : "${local.target_folder_name}/${file}" => {
+  effective_workflow_folder = var.workflow_folder_path != null ? var.workflow_folder_path : (
+    contains(["terraform", "bicep"], var.deployment_mode) ? "workflows/${var.deployment_mode}" : null
+  )
+
+  pipeline_main_folder = local.effective_workflow_folder != null ? "${path.module}/${local.effective_workflow_folder}/main" : null
+  pipeline_main_files = local.pipeline_main_folder != null ? { for file in fileset(local.pipeline_main_folder, "**") : "${local.target_folder_name}/${file}" => {
     name    = file
     content = templatefile("${local.pipeline_main_folder}/${file}", local.pipeline_main_replacements)
-  } }
+  } } : {}
 
   main_repository_files = merge(local.files, local.pipeline_main_files)
 
@@ -44,11 +48,11 @@ locals {
     environments = local.environment_replacements
   }
 
-  pipeline_template_folder = "${path.module}/workflows/templates"
-  pipeline_template_files = { for file in fileset(local.pipeline_template_folder, "**") : "${local.target_folder_name}/${file}" => {
+  pipeline_template_folder = local.effective_workflow_folder != null ? "${path.module}/${local.effective_workflow_folder}/templates" : null
+  pipeline_template_files = local.pipeline_template_folder != null ? { for file in fileset(local.pipeline_template_folder, "**") : "${local.target_folder_name}/${file}" => {
     name    = file
     content = file("${local.pipeline_template_folder}/${file}")
-  } }
+  } } : {}
 }
 
 resource "github_repository_file" "this" {
