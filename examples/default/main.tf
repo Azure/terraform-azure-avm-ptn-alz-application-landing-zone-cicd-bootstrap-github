@@ -45,5 +45,5 @@ module "test" {
   location            = var.location
   github_organization_name   = var.github_organization_name
   enable_telemetry    = var.enable_telemetry
-  example_module_path = "examples/terraform-example-module"
+  example_module_path = "examples/example-module-terraform"
 }
