@@ -76,6 +76,12 @@ variable "approvers" {
   default     = {}
 }
 
+variable "approvers_team_id" {
+  type        = number
+  default     = null
+  description = "The ID of a pre-existing GitHub team to use for environment approvals (BYO mode). When set, the module will not create an approval team or look up approver users. The provided team will be used as the environment reviewer."
+}
+
 variable "deployment_mode" {
   type        = string
   default     = "terraform"

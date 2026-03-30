@@ -26,6 +26,9 @@ locals {
   effective_template_repo_name = var.template_repository_name != null ? var.template_repository_name : github_repository.template[0].name
   effective_ci_template_path  = coalesce(var.ci_template_path, ".github/workflows/ci-template.yaml")
   effective_cd_template_path  = coalesce(var.cd_template_path, ".github/workflows/cd-template.yaml")
+  create_approval_team        = var.approvers_team_id == null && length(var.approvers) > 0
+  effective_approvers_team_id = var.approvers_team_id != null ? var.approvers_team_id : (local.create_approval_team ? github_team.this[0].id : null)
+  has_approvers               = var.approvers_team_id != null || length(var.approvers) > 0
 }
 
 locals {
