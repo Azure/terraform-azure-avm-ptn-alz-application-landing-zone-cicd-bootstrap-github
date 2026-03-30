@@ -11,7 +11,7 @@ resource "github_actions_environment_variable" "azure_subscription_id" {
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "AZURE_SUBSCRIPTION_ID"
-  value         = data.azurerm_subscription.current.subscription_id
+  value         = local.environments[each.value.environment].subscription_id
 }
 
 resource "github_actions_environment_variable" "azure_tenant_id" {
@@ -43,9 +43,14 @@ resource "github_actions_environment_variable" "additional_variables" {
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "ADDITIONAL_ENVIRONMENT_VARIABLES"
-  value = jsonencode({
-    TF_VAR_resource_group_name = module.resource_group_environments[each.value.environment].name
-  })
+  value = jsonencode(merge(
+    local.environments[each.value.environment].create_resource_group ? {
+      TF_VAR_resource_group_name = module.resource_group_environments[each.value.environment].name
+    } : {},
+    local.environments[each.value.environment].scope == "subscription" || local.environments[each.value.environment].scope == "management_group" ? {
+      TF_VAR_subscription_id = local.environments[each.value.environment].subscription_id
+    } : {},
+  ))
 }
 
 resource "github_actions_environment_variable" "var_file" {
