@@ -19,7 +19,7 @@ resource "github_actions_environment_variable" "azure_tenant_id" {
   repository    = github_repository.this.name
   environment   = github_repository_environment.this[each.key].environment
   variable_name = "AZURE_TENANT_ID"
-  value         = data.azurerm_client_config.current.tenant_id
+  value         = data.azapi_client_config.current.tenant_id
 }
 
 resource "github_actions_environment_variable" "backend_azure_storage_account_name" {

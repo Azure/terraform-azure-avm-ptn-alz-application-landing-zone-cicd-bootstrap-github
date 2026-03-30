@@ -135,6 +135,8 @@ variable "environments" {
     scope                                        = optional(string, "resource_group")
     subscription_id                              = optional(string)
     resource_id                                  = optional(string)
+    plan_role_definition_id_or_name              = optional(string, "Reader")
+    apply_role_definition_id_or_name             = optional(string, "Contributor")
     resource_group_create                        = optional(bool, true)
     resource_group_name_template                 = optional(string, "rg-$${workload}-env-$${environment}-$${location}-$${sequence}")
     user_assigned_managed_identity_name_template = optional(string, "uami-$${workload}-$${environment}-$${type}-$${location}-$${sequence}")
@@ -163,6 +165,8 @@ A map of environments to create. Each environment has the following properties:
 - `scope` - (Optional) The deployment scope: 'resource_group', 'subscription', or 'management_group'. Defaults to 'resource_group'.
 - `subscription_id` - (Optional) The subscription ID for the environment. Defaults to the current subscription.
 - `resource_id` - (Optional) The resource ID of the target scope. For 'resource_group' scope with BYO RG, supply the resource group resource ID.
+- `plan_role_definition_id_or_name` - (Optional) The role definition name or ID for the plan identity. Defaults to 'Reader'.
+- `apply_role_definition_id_or_name` - (Optional) The role definition name or ID for the apply identity. Defaults to 'Contributor'.
 - `resource_group_create` - (Optional) Whether to create a resource group. Only used when scope is 'resource_group' and resource_id is not set. Defaults to `true`.
 DESCRIPTION
   validation {
