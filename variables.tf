@@ -18,8 +18,38 @@ variable "organization_name" {
 
 variable "personal_access_token" {
   type        = string
-  description = "The personal access token for the GitHub organization."
+  default     = null
+  description = "The personal access token for the GitHub organization. Required for the GitHub provider if not set via the GITHUB_TOKEN environment variable. Also required for runner authentication when `runner_authentication_method` is 'pat'."
   sensitive   = true
+}
+
+variable "runner_authentication_method" {
+  type        = string
+  default     = "github_app"
+  description = "The authentication method for self-hosted runners. Possible values are 'pat' or 'github_app'. GitHub App authentication does not require a PAT for runner registration."
+  validation {
+    condition     = contains(["pat", "github_app"], var.runner_authentication_method)
+    error_message = "runner_authentication_method must be 'pat' or 'github_app'."
+  }
+}
+
+variable "github_app_id" {
+  type        = string
+  default     = null
+  description = "The application ID for GitHub App authentication. Required when `runner_authentication_method` is 'github_app'."
+}
+
+variable "github_app_installation_id" {
+  type        = string
+  default     = null
+  description = "The installation ID for GitHub App authentication. Required when `runner_authentication_method` is 'github_app'."
+}
+
+variable "github_app_key" {
+  type        = string
+  default     = null
+  sensitive   = true
+  description = "The private key for GitHub App authentication. Required when `runner_authentication_method` is 'github_app'."
 }
 
 variable "workflow_folder_path" {

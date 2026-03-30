@@ -12,8 +12,12 @@ module "azure_devops_agents" {
   location                                      = var.location
   compute_types                                 = [var.self_hosted_agent_type]
   container_instance_count                      = 4
-  version_control_system_type                   = "github"
-  version_control_system_personal_access_token  = var.personal_access_token
+  version_control_system_type                           = "github"
+  version_control_system_authentication_method           = var.runner_authentication_method
+  version_control_system_personal_access_token           = var.runner_authentication_method == "pat" ? var.personal_access_token : null
+  version_control_system_github_application_id           = var.runner_authentication_method == "github_app" ? var.github_app_id : null
+  version_control_system_github_application_installation_id = var.runner_authentication_method == "github_app" ? var.github_app_installation_id : null
+  version_control_system_github_application_key          = var.runner_authentication_method == "github_app" ? var.github_app_key : null
   version_control_system_organization           = var.organization_name
   version_control_system_repository             = github_repository.this.name
   version_control_system_runner_group           = var.use_runner_group ? github_actions_runner_group.this[0].name : null

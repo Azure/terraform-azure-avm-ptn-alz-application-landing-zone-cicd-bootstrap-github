@@ -18,9 +18,3 @@ variable "organization_name" {
   type        = string
   description = "The name of the GitHub organization."
 }
-
-variable "personal_access_token" {
-  type        = string
-  description = "The personal access token for the GitHub organization."
-  sensitive   = true
-}
