@@ -43,5 +43,6 @@ jobs:
       environment_name_apply: ${environment.environment_name_apply}
       dependent_environment: ${environment.dependent_environment}
       backend_azure_storage_account_container_name: ${environment.backend_azure_storage_account_container_name}
+      deployments_json: '${jsonencode(deployments)}'
 
 %{ endfor ~}

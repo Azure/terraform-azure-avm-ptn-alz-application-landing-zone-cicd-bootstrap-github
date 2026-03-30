@@ -35,17 +35,24 @@ on:
         description: 'Root Module Folder Relative Path'
         default: '.'
         type: string
+      deployments_json:
+        description: 'JSON array of deployment stack configurations'
+        default: '[]'
+        type: string
 
 jobs:
   what_if:
-    name: What-If with Deployment Stacks
+    name: What-If - ${{ matrix.deployment.name }}
     runs-on:
       ${{ inputs.runner_name }}
-    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}-${{ matrix.deployment.name }}
     environment: ${{ inputs.environment_name_plan }}
     permissions:
       id-token: write
       contents: read
+    strategy:
+      matrix:
+        deployment: ${{ fromJson(inputs.deployments_json) }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -57,50 +64,43 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deployment Stacks What-If
+      - name: What-If - ${{ matrix.deployment.name }}
         shell: pwsh
         run: |
-          $deploymentsJson = $env:BICEP_DEPLOYMENTS
-          if([string]::IsNullOrEmpty($deploymentsJson)) {
-            Write-Host "No BICEP_DEPLOYMENTS variable set, nothing to deploy"
-            return
-          }
-          $deployments = ConvertFrom-Json $deploymentsJson
-          foreach($deployment in $deployments) {
-            Write-Host "--- What-If for deployment stack: $($deployment.name) ---"
-            $scope = if($deployment.scope) { $deployment.scope } else { "group" }
-            $templateFile = "${{ inputs.root_module_folder_relative_path }}/$($deployment.template_file)"
-            $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+          $scope = "${{ matrix.deployment.scope }}"
+          if([string]::IsNullOrEmpty($scope)) { $scope = "group" }
+          $templateFile = "${{ inputs.root_module_folder_relative_path }}/${{ matrix.deployment.template_file }}"
+          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
 
-            switch($scope) {
-              "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
-              "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
-              "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
-            }
-
-            $arguments += @("--template-file", $templateFile)
-            if($deployment.parameters_file) {
-              $paramsFile = "${{ inputs.root_module_folder_relative_path }}/$($deployment.parameters_file)"
-              $arguments += @("--parameters", "@$paramsFile")
-            }
-            $arguments += "--what-if"
-            Write-Host "Running: az $arguments"
-            az @arguments
-            if($LASTEXITCODE -ne 0) { throw "What-If failed for deployment stack: $($deployment.name)" }
+          switch($scope) {
+            "group" { $arguments += @("--resource-group", "${{ matrix.deployment.resource_group }}", "--name", "${{ matrix.deployment.name }}") }
+            "sub"   { $arguments += @("--location", "${{ matrix.deployment.location }}", "--name", "${{ matrix.deployment.name }}") }
+            "mg"    { $arguments += @("--location", "${{ matrix.deployment.location }}", "--management-group-id", "${{ matrix.deployment.management_group_id }}", "--name", "${{ matrix.deployment.name }}") }
           }
-        env:
-          BICEP_DEPLOYMENTS: ${{ vars.BICEP_DEPLOYMENTS }}
+
+          $arguments += @("--template-file", $templateFile)
+          $paramsFile = "${{ matrix.deployment.parameters_file }}"
+          if(-not [string]::IsNullOrEmpty($paramsFile)) {
+            $arguments += @("--parameters", "@${{ inputs.root_module_folder_relative_path }}/$paramsFile")
+          }
+          $arguments += "--what-if"
+          Write-Host "Running: az $arguments"
+          az @arguments
+          if($LASTEXITCODE -ne 0) { throw "What-If failed for: ${{ matrix.deployment.name }}" }
 
   deploy:
-    name: Deploy with Deployment Stacks
+    name: Deploy - ${{ matrix.deployment.name }}
     needs: what_if
     runs-on:
       ${{ inputs.runner_name }}
-    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}-${{ matrix.deployment.name }}
     environment: ${{ inputs.environment_name_apply }}
     permissions:
       id-token: write
       contents: read
+    strategy:
+      matrix:
+        deployment: ${{ fromJson(inputs.deployments_json) }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -112,35 +112,25 @@ jobs:
           tenant-id: ${{ vars.AZURE_TENANT_ID }}
           subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Deployment Stacks Deploy
+      - name: Deploy - ${{ matrix.deployment.name }}
         shell: pwsh
         run: |
-          $deploymentsJson = $env:BICEP_DEPLOYMENTS
-          if([string]::IsNullOrEmpty($deploymentsJson)) {
-            Write-Host "No BICEP_DEPLOYMENTS variable set, nothing to deploy"
-            return
-          }
-          $deployments = ConvertFrom-Json $deploymentsJson
-          foreach($deployment in $deployments) {
-            Write-Host "--- Deploying stack: $($deployment.name) ---"
-            $scope = if($deployment.scope) { $deployment.scope } else { "group" }
-            $templateFile = "${{ inputs.root_module_folder_relative_path }}/$($deployment.template_file)"
-            $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+          $scope = "${{ matrix.deployment.scope }}"
+          if([string]::IsNullOrEmpty($scope)) { $scope = "group" }
+          $templateFile = "${{ inputs.root_module_folder_relative_path }}/${{ matrix.deployment.template_file }}"
+          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
 
-            switch($scope) {
-              "group"        { $arguments += @("--resource-group", $deployment.resource_group, "--name", $deployment.name) }
-              "sub"          { $arguments += @("--location", $deployment.location, "--name", $deployment.name) }
-              "mg"           { $arguments += @("--location", $deployment.location, "--management-group-id", $deployment.management_group_id, "--name", $deployment.name) }
-            }
-
-            $arguments += @("--template-file", $templateFile)
-            if($deployment.parameters_file) {
-              $paramsFile = "${{ inputs.root_module_folder_relative_path }}/$($deployment.parameters_file)"
-              $arguments += @("--parameters", "@$paramsFile")
-            }
-            Write-Host "Running: az $arguments"
-            az @arguments
-            if($LASTEXITCODE -ne 0) { throw "Deploy failed for deployment stack: $($deployment.name)" }
+          switch($scope) {
+            "group" { $arguments += @("--resource-group", "${{ matrix.deployment.resource_group }}", "--name", "${{ matrix.deployment.name }}") }
+            "sub"   { $arguments += @("--location", "${{ matrix.deployment.location }}", "--name", "${{ matrix.deployment.name }}") }
+            "mg"    { $arguments += @("--location", "${{ matrix.deployment.location }}", "--management-group-id", "${{ matrix.deployment.management_group_id }}", "--name", "${{ matrix.deployment.name }}") }
           }
-        env:
-          BICEP_DEPLOYMENTS: ${{ vars.BICEP_DEPLOYMENTS }}
+
+          $arguments += @("--template-file", $templateFile)
+          $paramsFile = "${{ matrix.deployment.parameters_file }}"
+          if(-not [string]::IsNullOrEmpty($paramsFile)) {
+            $arguments += @("--parameters", "@${{ inputs.root_module_folder_relative_path }}/$paramsFile")
+          }
+          Write-Host "Running: az $arguments"
+          az @arguments
+          if($LASTEXITCODE -ne 0) { throw "Deploy failed for: ${{ matrix.deployment.name }}" }

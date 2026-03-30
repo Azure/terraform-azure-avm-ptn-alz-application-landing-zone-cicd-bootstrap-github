@@ -5,6 +5,10 @@ inputs:
   root_module_folder_relative_path:
     description: 'Root Module Folder Relative Path'
     required: true
+  deployments_json:
+    description: 'JSON array of deployment stack configurations'
+    required: false
+    default: '[]'
 
 runs:
   using: "composite"
@@ -15,13 +19,14 @@ runs:
     - name: Bicep Build (Validate)
       shell: pwsh
       run: |
-        $deploymentsJson = $env:BICEP_DEPLOYMENTS
-        if([string]::IsNullOrEmpty($deploymentsJson)) {
-          az bicep build --file "${{inputs.root_module_folder_relative_path}}/main.bicep"
+        $deploymentsJson = '${{ inputs.deployments_json }}'
+        $deployments = ConvertFrom-Json $deploymentsJson
+        if($deployments.Count -eq 0) {
+          az bicep build --file "${{ inputs.root_module_folder_relative_path }}/main.bicep"
         } else {
-          $deployments = ConvertFrom-Json $deploymentsJson
           foreach($deployment in $deployments) {
             Write-Host "Validating: $($deployment.template_file)"
-            az bicep build --file "${{inputs.root_module_folder_relative_path}}/$($deployment.template_file)"
+            az bicep build --file "${{ inputs.root_module_folder_relative_path }}/$($deployment.template_file)"
+            if($LASTEXITCODE -ne 0) { throw "Bicep build failed for: $($deployment.template_file)" }
           }
         }
