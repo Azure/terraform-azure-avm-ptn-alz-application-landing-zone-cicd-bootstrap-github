@@ -45,6 +45,6 @@ module "test" {
   location                 = var.location
   compute_type             = "azure_container_app"
   enable_telemetry         = var.enable_telemetry
-  example_module_path      = "examples/example-module-terraform"
+  example_module_path      = "${path.root}/../../example-repos/terraform"
   runner_use_self_hosted   = true
 }

@@ -41,7 +41,13 @@ variable "deployment_mode" {
 variable "example_module_path" {
   type        = string
   default     = null
-  description = "The relative path to the example module to seed into the created repository."
+  description = "The absolute path to the example module to seed into the created repository."
+}
+
+variable "github_create_template_repository" {
+  type        = bool
+  default     = true
+  description = "Whether to create a template repository for CI/CD workflow templates. Set to false if you don't need a template repository."
 }
 
 variable "github_existing_template_repository_name" {
@@ -53,7 +59,7 @@ variable "github_existing_template_repository_name" {
 variable "github_workflow_folder_path" {
   type        = string
   default     = null
-  description = "The relative path to the folder containing workflow YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates."
+  description = "The absolute path to the folder containing workflow YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates."
 }
 
 variable "github_workflows" {

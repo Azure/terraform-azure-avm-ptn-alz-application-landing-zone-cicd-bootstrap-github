@@ -64,8 +64,8 @@ module "test" {
       }
     }
   }
-  github_existing_template_repository_name = "not-used"
-  github_workflow_folder_path              = "workflows"
+  github_create_template_repository = false
+  github_workflow_folder_path       = "${path.root}/workflows"
   github_workflows = {
     info = {
       main_file     = "workflows/info.yaml"

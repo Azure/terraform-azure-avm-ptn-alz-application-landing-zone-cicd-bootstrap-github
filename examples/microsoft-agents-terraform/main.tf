@@ -44,6 +44,6 @@ module "test" {
   github_organization_name = var.github_organization_name
   location                 = var.location
   enable_telemetry         = var.enable_telemetry
-  example_module_path      = "examples/example-module-terraform"
+  example_module_path      = "${path.root}/../../example-repos/terraform"
   runner_use_self_hosted   = false
 }

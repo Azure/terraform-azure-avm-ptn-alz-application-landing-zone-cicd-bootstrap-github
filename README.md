@@ -262,7 +262,7 @@ Default:
 
 ### <a name="input_example_module_path"></a> [example\_module\_path](#input\_example\_module\_path)
 
-Description: The relative path to the example module to seed into the created repository.
+Description: The absolute path to the example module to seed into the created repository.
 
 Type: `string`
 
@@ -292,6 +292,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_github_create_template_repository"></a> [github\_create\_template\_repository](#input\_github\_create\_template\_repository)
+
+Description: Whether to create a template repository for CI/CD workflow templates. Set to false if you don't need a template repository.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_github_existing_approvers_team_id"></a> [github\_existing\_approvers\_team\_id](#input\_github\_existing\_approvers\_team\_id)
 
 Description: The ID of a pre-existing GitHub team to use for environment approvals (BYO mode). When set, the module will not create an approval team or look up approver users.
@@ -310,7 +318,7 @@ Default: `null`
 
 ### <a name="input_github_workflow_folder_path"></a> [github\_workflow\_folder\_path](#input\_github\_workflow\_folder\_path)
 
-Description: The relative path to the folder containing workflow YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates.
+Description: The absolute path to the folder containing workflow YAML files. When null, auto-selects based on `deployment_mode` (e.g. 'workflows/terraform' or 'workflows/bicep'). Set to a custom path to use your own workflow templates.
 
 Type: `string`
 

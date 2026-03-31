@@ -1,7 +1,7 @@
 locals {
   default_commit_email = coalesce(local.primary_approver, "demouser@example.com")
   effective_workflow_folder = var.github_workflow_folder_path != null ? var.github_workflow_folder_path : (
-    contains(["terraform", "bicep"], var.deployment_mode) ? "workflows/${var.deployment_mode}" : null
+    contains(["terraform", "bicep"], var.deployment_mode) ? "${path.module}/workflows/${var.deployment_mode}" : null
   )
   environment_replacements = { for environment_key, environment_value in local.environments : "${format("%03s", environment_value.display_order)}-${environment_key}" => {
     name                                         = lower(replace(environment_key, "-", ""))
@@ -21,7 +21,7 @@ locals {
     name    = file
     content = templatefile("${local.pipeline_main_folder}/${file}", local.pipeline_main_replacements)
   } } : {}
-  pipeline_main_folder = local.effective_workflow_folder != null ? "${path.module}/${local.effective_workflow_folder}/main" : null
+  pipeline_main_folder = local.effective_workflow_folder != null ? "${local.effective_workflow_folder}/main" : null
   pipeline_main_replacements = {
     environments                     = local.environment_replacements
     organization_name                = var.github_organization_name
@@ -34,14 +34,14 @@ locals {
     name    = file
     content = file("${local.pipeline_template_folder}/${file}")
   } } : {}
-  pipeline_template_folder = local.effective_workflow_folder != null ? "${path.module}/${local.effective_workflow_folder}/templates" : null
+  pipeline_template_folder = local.effective_workflow_folder != null ? "${local.effective_workflow_folder}/templates" : null
   pipeline_template_replacements = {
     environments = local.environment_replacements
   }
   primary_approver        = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
   self_hosted_runner_name = var.runner_existing_group_name != null ? "group: ${var.runner_existing_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
   target_folder_name      = ".github"
-  template_folder         = var.example_module_path != null ? "${path.module}/${var.example_module_path}" : null
+  template_folder         = var.example_module_path
 }
 
 resource "github_repository_file" "this" {
