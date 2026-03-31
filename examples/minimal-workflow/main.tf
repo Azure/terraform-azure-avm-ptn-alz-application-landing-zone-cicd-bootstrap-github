@@ -2,6 +2,10 @@ terraform {
   required_version = "~> 1.9"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.4"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
@@ -33,6 +37,8 @@ provider "github" {
   owner = var.github_organization_name
 }
 
+data "azapi_client_config" "current" {}
+
 # Minimal example: single write identity, GitHub-hosted runners, no template repo, custom workflow
 module "test" {
   source = "../../"
@@ -57,7 +63,7 @@ module "test" {
       display_order   = 1
       display_name    = "Development"
       scope           = "subscription"
-      subscription_id = var.target_subscription_id
+      subscription_id = data.azapi_client_config.current.subscription_id
       identities = {
         read = { enabled = false }
       }
