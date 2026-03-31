@@ -1,0 +1,24 @@
+---
+name: Environment Info
+on:
+  workflow_dispatch:
+
+jobs:
+  info:
+    name: Print Environment Info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Info
+        shell: pwsh
+        run: |
+          Write-Host "=== Environment Info ==="
+          Write-Host "Workflow: ${{ github.workflow }}"
+          Write-Host "Repository: ${{ github.repository }}"
+          Write-Host "Branch: ${{ github.ref }}"
+          Write-Host "Run ID: ${{ github.run_id }}"
+          Write-Host "Runner: ${{ runner.name }}"
+          Write-Host "OS: ${{ runner.os }}"
+          Write-Host ""
+          Write-Host "=== Azure Connection ==="
+          Write-Host "This is a minimal workflow example."
+          Write-Host "No actual deployment is performed."
