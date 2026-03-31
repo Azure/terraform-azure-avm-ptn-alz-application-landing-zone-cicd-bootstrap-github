@@ -9,14 +9,22 @@ module "user_assigned_managed_identity" {
 }
 
 locals {
-  federated_credentials = { for federated_credential in flatten([for env_key, env_value in local.environment_split : [
+  federated_credentials_with_templates = { for federated_credential in flatten([for env_key, env_value in local.environment_split : [
     for template in env_value.required_templates : {
       composite_key                     = "${env_key}-${template}"
+      federated_credential_name         = env_value.federated_credential_name
       user_assigned_managed_identity_id = module.user_assigned_managed_identity[env_key].resource_id
       subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this.repo_id}:environment:${env_key}:job_workflow_ref:${format(local.template_claim_structure, template)}"
     }
   ]]) : federated_credential.composite_key => federated_credential }
-  template_claim_structure = "${var.github_organization_name}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
+  federated_credentials_without_templates = { for env_key, env_value in local.environment_split : env_key => {
+    composite_key                     = env_key
+    federated_credential_name         = env_value.federated_credential_name
+    user_assigned_managed_identity_id = module.user_assigned_managed_identity[env_key].resource_id
+    subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this.repo_id}:environment:${env_key}"
+  } if length(env_value.required_templates) == 0 }
+  federated_credentials    = merge(local.federated_credentials_with_templates, local.federated_credentials_without_templates)
+  template_claim_structure = "${data.github_organization.this.login}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
 }
 
 resource "azapi_resource" "federated_identity_credential" {

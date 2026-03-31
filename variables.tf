@@ -32,7 +32,7 @@ DESCRIPTION
 variable "runner_personal_access_token" {
   type        = string
   default     = null
-  description = "The personal access token for the GitHub organization. Required for the GitHub provider if not set via the GITHUB_TOKEN environment variable. Also required for runner authentication when `runner_authentication_method` is 'pat'."
+  description = "The personal access token for the GitHub organization. Required for runner authentication when `runner_authentication_method` is 'pat'. Provider auth should be configured via the GITHUB_TOKEN environment variable."
   sensitive   = true
 }
 

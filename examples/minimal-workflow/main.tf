@@ -4,7 +4,7 @@ terraform {
   required_providers {
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.4"
+      version = "~> 2.9"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -12,7 +12,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "~> 6.5"
+      version = "~> 6.11"
     }
     modtm = {
       source  = "azure/modtm"
@@ -30,12 +30,14 @@ provider "azurerm" {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
+    storage {
+      data_plane_available = false
+    }
   }
+  storage_use_azuread = true
 }
 
-provider "github" {
-  owner = var.github_organization_name
-}
+provider "github" {}
 
 data "azapi_client_config" "current" {}
 

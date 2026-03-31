@@ -24,7 +24,7 @@ locals {
   pipeline_main_folder = local.effective_workflow_folder != null ? "${local.effective_workflow_folder}/main" : null
   pipeline_main_replacements = {
     environments                     = local.environment_replacements
-    organization_name                = var.github_organization_name
+    organization_name                = data.github_organization.this.login
     repository_name_templates        = local.effective_template_repo_name
     workflows                        = local.effective_workflows
     root_module_folder_relative_path = "."

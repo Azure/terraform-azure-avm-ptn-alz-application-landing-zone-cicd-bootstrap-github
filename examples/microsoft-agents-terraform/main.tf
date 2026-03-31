@@ -8,7 +8,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "~> 6.5"
+      version = "~> 6.11"
     }
     modtm = {
       source  = "azure/modtm"
@@ -33,9 +33,7 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {
-  owner = var.github_organization_name
-}
+provider "github" {}
 
 # GitHub-hosted runners with Terraform workflows (no self-hosted infra)
 module "test" {

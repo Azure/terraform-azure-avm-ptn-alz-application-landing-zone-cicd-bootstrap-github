@@ -65,7 +65,7 @@ A map of environments to create. Each environment has the following properties:
 - `identities` - (Optional) An object with `read` and `write` identity configurations. Each has:
   - `enabled` - (Optional) Whether to create this identity. Defaults to `true`.
   - `name` - (Optional) Explicit identity name. When null, generated from `identity_read_name` or `identity_write_name` template in `resource_name_templates`.
-  - `allowed_template_keys` - (Optional) Workflow keys this identity is allowed to use for OIDC federated credentials. When null, read gets all workflows, write gets only 'cd'.
+  - `allowed_template_keys` - (Optional) Workflow keys this identity is allowed to use for OIDC federated credentials. When null, read defaults to ['ci', 'cd'], write defaults to ['cd'].
   - `role_assignments` - (Optional) A map of role assignments. Each value has `role_definition_id_or_name`. Read defaults to Reader, write defaults to Contributor.
 DESCRIPTION
 
