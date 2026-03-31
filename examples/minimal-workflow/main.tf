@@ -43,21 +43,9 @@ data "azapi_client_config" "current" {}
 module "test" {
   source = "../../"
 
-  location                = var.location
   github_organization_name = var.github_organization_name
-  deployment_mode         = "other"
-  runner_use_self_hosted  = false
-
-  github_existing_template_repository_name = "not-used"
-
-  github_workflow_folder_path = "workflows"
-  github_workflows = {
-    info = {
-      main_file     = "workflows/info.yaml"
-      template_path = ".github/workflows/info-template.yaml"
-    }
-  }
-
+  location                 = var.location
+  deployment_mode          = "other"
   environments = {
     dev = {
       display_order   = 1
@@ -69,4 +57,13 @@ module "test" {
       }
     }
   }
+  github_existing_template_repository_name = "not-used"
+  github_workflow_folder_path              = "workflows"
+  github_workflows = {
+    info = {
+      main_file     = "workflows/info.yaml"
+      template_path = ".github/workflows/info-template.yaml"
+    }
+  }
+  runner_use_self_hosted = false
 }

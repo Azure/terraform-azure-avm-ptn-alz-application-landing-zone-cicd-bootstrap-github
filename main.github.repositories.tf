@@ -1,6 +1,6 @@
 locals {
-  free_plan       = "free"
   enterprise_plan = "enterprise"
+  free_plan       = "free"
 }
 
 resource "github_repository" "this" {

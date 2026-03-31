@@ -41,9 +41,9 @@ provider "github" {
 module "test" {
   source = "../../"
 
-  location            = var.location
   github_organization_name   = var.github_organization_name
-  enable_telemetry    = var.enable_telemetry
-  example_module_path = "examples/example-module-terraform"
+  location                   = var.location
+  enable_telemetry           = var.enable_telemetry
+  example_module_path        = "examples/example-module-terraform"
   runner_existing_group_name = "my-existing-runner-group"
 }

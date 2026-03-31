@@ -1,28 +1,8 @@
 # --- Repositories ---
 
-variable "github_existing_template_repository_name" {
-  type        = string
-  default     = null
-  description = "The name of a pre-existing template repository containing CI/CD workflow templates (BYO mode). When set, the module will not create a template repository or push template files."
-}
-
-variable "example_module_path" {
-  type        = string
-  description = "The relative path to the example module to seed into the created repository."
-  default     = null
-}
-
 # --- Deployment Mode ---
 
-variable "deployment_mode" {
-  type        = string
-  default     = "terraform"
-  description = "The deployment mode for the module. Possible values are 'terraform', 'bicep', or 'other'. Only 'terraform' mode creates the storage account for Terraform state."
-  validation {
-    condition     = contains(["terraform", "bicep", "other"], var.deployment_mode)
-    error_message = "deployment_mode must be 'terraform', 'bicep', or 'other'."
-  }
-}
+# --- Workflow Templates ---
 
 variable "bicep_deployments" {
   type = list(object({
@@ -47,7 +27,28 @@ A list of Bicep deployment stack configurations. Each deployment specifies a tem
 DESCRIPTION
 }
 
-# --- Workflow Templates ---
+variable "deployment_mode" {
+  type        = string
+  default     = "terraform"
+  description = "The deployment mode for the module. Possible values are 'terraform', 'bicep', or 'other'. Only 'terraform' mode creates the storage account for Terraform state."
+
+  validation {
+    condition     = contains(["terraform", "bicep", "other"], var.deployment_mode)
+    error_message = "deployment_mode must be 'terraform', 'bicep', or 'other'."
+  }
+}
+
+variable "example_module_path" {
+  type        = string
+  default     = null
+  description = "The relative path to the example module to seed into the created repository."
+}
+
+variable "github_existing_template_repository_name" {
+  type        = string
+  default     = null
+  description = "The name of a pre-existing template repository containing CI/CD workflow templates (BYO mode). When set, the module will not create a template repository or push template files."
+}
 
 variable "github_workflow_folder_path" {
   type        = string

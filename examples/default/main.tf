@@ -41,9 +41,9 @@ provider "github" {
 module "test" {
   source = "../../"
 
+  github_organization_name = var.github_organization_name
   # source             = "Azure/avm-ptn-alz-application-landing-zone-cicd-bootstrap-github/azurerm"
   location            = var.location
-  github_organization_name   = var.github_organization_name
   enable_telemetry    = var.enable_telemetry
   example_module_path = "examples/example-module-terraform"
 }

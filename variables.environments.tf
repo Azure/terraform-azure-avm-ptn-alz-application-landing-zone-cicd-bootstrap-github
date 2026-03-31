@@ -1,26 +1,32 @@
+variable "approvers" {
+  type        = map(string)
+  default     = {}
+  description = "A map of approvers for environment approvals. The key is the approver name and the value is the approver email or login."
+}
+
 variable "environments" {
   type = map(object({
-    display_order                                = number
-    display_name                                 = string
-    has_approval                                 = optional(bool, false)
-    dependent_environment                        = optional(string, "")
-    scope                                        = optional(string, "resource_group")
-    subscription_id                              = optional(string)
-    resource_id                                  = optional(string)
-    resource_group_name                         = optional(string)
-    resource_group_create                        = optional(bool, true)
+    display_order         = number
+    display_name          = string
+    has_approval          = optional(bool, false)
+    dependent_environment = optional(string, "")
+    scope                 = optional(string, "resource_group")
+    subscription_id       = optional(string)
+    resource_id           = optional(string)
+    resource_group_name   = optional(string)
+    resource_group_create = optional(bool, true)
     identities = optional(object({
       read = optional(object({
-        enabled            = optional(bool, true)
-        name               = optional(string)
+        enabled               = optional(bool, true)
+        name                  = optional(string)
         allowed_template_keys = optional(list(string))
         role_assignments = optional(map(object({
           role_definition_id_or_name = string
         })), { default = { role_definition_id_or_name = "Reader" } })
       }), {})
       write = optional(object({
-        enabled            = optional(bool, true)
-        name               = optional(string)
+        enabled               = optional(bool, true)
+        name                  = optional(string)
         allowed_template_keys = optional(list(string))
         role_assignments = optional(map(object({
           role_definition_id_or_name = string
@@ -62,6 +68,7 @@ A map of environments to create. Each environment has the following properties:
   - `allowed_template_keys` - (Optional) Workflow keys this identity is allowed to use for OIDC federated credentials. When null, read gets all workflows, write gets only 'cd'.
   - `role_assignments` - (Optional) A map of role assignments. Each value has `role_definition_id_or_name`. Read defaults to Reader, write defaults to Contributor.
 DESCRIPTION
+
   validation {
     condition     = alltrue([for k, v in var.environments : contains(["resource_group", "subscription", "management_group"], v.scope)])
     error_message = "Each environment scope must be 'resource_group', 'subscription', or 'management_group'."
@@ -70,12 +77,6 @@ DESCRIPTION
     condition     = alltrue([for k, v in var.environments : v.identities.read.enabled || v.identities.write.enabled])
     error_message = "Each environment must have at least one identity enabled (read or write)."
   }
-}
-
-variable "approvers" {
-  type        = map(string)
-  description = "A map of approvers for environment approvals. The key is the approver name and the value is the approver email or login."
-  default     = {}
 }
 
 variable "github_existing_approvers_team_id" {

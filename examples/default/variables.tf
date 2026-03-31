@@ -1,3 +1,8 @@
+variable "github_organization_name" {
+  type        = string
+  description = "The name of the GitHub organization."
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
@@ -10,11 +15,6 @@ DESCRIPTION
 
 variable "location" {
   type        = string
-  description = "The location/region where the resources will be created."
   default     = "uksouth"
-}
-
-variable "github_organization_name" {
-  type        = string
-  description = "The name of the GitHub organization."
+  description = "The location/region where the resources will be created."
 }

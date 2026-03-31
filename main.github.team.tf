@@ -5,7 +5,6 @@ locals {
     email      = user.email
     matched_on = contains(values(var.approvers), user.email) ? user.email : (contains(values(var.approvers), user.login) ? user.login : "none")
   } if contains(values(var.approvers), user.email) || contains(values(var.approvers), user.login)] : []
-
   invalid_approvers = local.create_approval_team ? setsubtract(values(var.approvers), local.approvers[*].matched_on) : []
 }
 

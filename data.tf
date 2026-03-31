@@ -1,10 +1,10 @@
 data "azapi_client_config" "current" {}
 
 data "azapi_resource_action" "current_subscription" {
-  type        = "Microsoft.Resources/subscriptions@2022-12-01"
-  resource_id = "/subscriptions/${data.azapi_client_config.current.subscription_id}"
-  action      = ""
-  method      = "GET"
+  action                 = ""
+  method                 = "GET"
+  resource_id            = "/subscriptions/${data.azapi_client_config.current.subscription_id}"
+  type                   = "Microsoft.Resources/subscriptions@2022-12-01"
   response_export_values = ["displayName"]
 }
 

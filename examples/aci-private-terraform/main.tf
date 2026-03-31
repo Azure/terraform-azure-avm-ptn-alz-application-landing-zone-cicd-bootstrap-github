@@ -41,10 +41,10 @@ provider "github" {
 module "test" {
   source = "../../"
 
-  location               = var.location
-  github_organization_name      = var.github_organization_name
-  enable_telemetry       = var.enable_telemetry
-  example_module_path    = "examples/example-module-terraform"
-  compute_type           = "azure_container_instance"
-  runner_use_self_hosted = true
+  github_organization_name = var.github_organization_name
+  location                 = var.location
+  compute_type             = "azure_container_instance"
+  enable_telemetry         = var.enable_telemetry
+  example_module_path      = "examples/example-module-terraform"
+  runner_use_self_hosted   = true
 }

@@ -41,11 +41,11 @@ provider "github" {
 module "test" {
   source = "../../"
 
-  location               = var.location
-  github_organization_name      = var.github_organization_name
-  enable_telemetry       = var.enable_telemetry
-  deployment_mode        = "bicep"
-  example_module_path    = "examples/example-module-bicep"
-  compute_type = "azure_container_app"
-  runner_use_self_hosted = true
+  github_organization_name = var.github_organization_name
+  location                 = var.location
+  compute_type             = "azure_container_app"
+  deployment_mode          = "bicep"
+  enable_telemetry         = var.enable_telemetry
+  example_module_path      = "examples/example-module-bicep"
+  runner_use_self_hosted   = true
 }
