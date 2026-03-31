@@ -8,3 +8,9 @@ variable "github_organization_name" {
   type        = string
   description = "The name of the GitHub organization."
 }
+
+variable "target_subscription_id" {
+  type        = string
+  default     = null
+  description = "The subscription ID for the target environment. When null, uses the current subscription."
+}
