@@ -15,7 +15,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "~> 6.5"
+      version = "~> 6.11"
     }
     modtm = {
       source  = "azure/modtm"
@@ -40,9 +40,7 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {
-  owner = var.github_organization_name
-}
+provider "github" {}
 
 # ACA with Bicep workflows
 module "test" {
@@ -50,10 +48,10 @@ module "test" {
 
   github_organization_name = var.github_organization_name
   location                 = var.location
-  compute_type             = "azure_container_app"
   deployment_mode          = "bicep"
   enable_telemetry         = var.enable_telemetry
   example_module_path      = "${path.root}/../../example-repos/bicep"
+  runner_compute_type      = "azure_container_app"
   runner_use_self_hosted   = true
 }
 ```
@@ -67,7 +65,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
-- <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.5)
+- <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.11)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 

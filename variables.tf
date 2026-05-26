@@ -1,6 +1,12 @@
 variable "github_organization_name" {
   type        = string
   description = "The name of the GitHub organization."
+  nullable    = false
+
+  validation {
+    condition     = can(regex("^[A-Za-z0-9][A-Za-z0-9-]{0,38}$", var.github_organization_name))
+    error_message = "github_organization_name must be a valid GitHub organization name (1-39 chars, alphanumerics and hyphens, must start with alphanumeric)."
+  }
 }
 
 variable "location" {
@@ -34,6 +40,11 @@ variable "runner_personal_access_token" {
   default     = null
   description = "The personal access token for the GitHub organization. Required for runner authentication when `runner_authentication_method` is 'pat'. Provider auth should be configured via the GITHUB_TOKEN environment variable."
   sensitive   = true
+
+  validation {
+    condition     = !(var.runner_use_self_hosted && var.runner_authentication_method == "pat") || var.runner_personal_access_token != null
+    error_message = "runner_personal_access_token must be set when runner_use_self_hosted is true and runner_authentication_method is 'pat'."
+  }
 }
 
 # tflint-ignore: terraform_unused_declarations

@@ -4,14 +4,18 @@ locals {
 }
 
 resource "github_repository" "this" {
-  name                 = local.resource_names.repository_main_name
-  description          = local.resource_names.repository_main_name
-  auto_init            = true
-  visibility           = data.github_organization.this.plan == local.free_plan ? "public" : "private"
-  allow_update_branch  = true
-  allow_merge_commit   = false
-  allow_rebase_merge   = false
-  vulnerability_alerts = true
+  name                = local.resource_names.repository_main_name
+  description         = local.resource_names.repository_main_name
+  auto_init           = true
+  visibility          = data.github_organization.this.plan == local.free_plan ? "public" : "private"
+  allow_update_branch = true
+  allow_merge_commit  = false
+  allow_rebase_merge  = false
+}
+
+resource "github_repository_vulnerability_alerts" "this" {
+  repository = github_repository.this.name
+  enabled    = true
 }
 
 resource "github_actions_repository_oidc_subject_claim_customization_template" "this" {
@@ -21,15 +25,20 @@ resource "github_actions_repository_oidc_subject_claim_customization_template" "
 }
 
 resource "github_repository" "template" {
-  count                = local.create_template_repository ? 1 : 0
-  name                 = local.resource_names.repository_template_name
-  description          = local.resource_names.repository_template_name
-  auto_init            = true
-  visibility           = data.github_organization.this.plan == local.free_plan ? "public" : "private"
-  allow_update_branch  = true
-  allow_merge_commit   = false
-  allow_rebase_merge   = false
-  vulnerability_alerts = true
+  count               = local.create_template_repository ? 1 : 0
+  name                = local.resource_names.repository_template_name
+  description         = local.resource_names.repository_template_name
+  auto_init           = true
+  visibility          = data.github_organization.this.plan == local.free_plan ? "public" : "private"
+  allow_update_branch = true
+  allow_merge_commit  = false
+  allow_rebase_merge  = false
+}
+
+resource "github_repository_vulnerability_alerts" "template" {
+  count      = local.create_template_repository ? 1 : 0
+  repository = github_repository.template[0].name
+  enabled    = true
 }
 
 resource "github_branch_protection" "this" {

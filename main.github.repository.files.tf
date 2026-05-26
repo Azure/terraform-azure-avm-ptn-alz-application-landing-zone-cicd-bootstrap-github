@@ -6,7 +6,7 @@ locals {
   environment_replacements = { for environment_key, environment_value in local.environments : "${format("%03s", environment_value.display_order)}-${environment_key}" => {
     name                                         = lower(replace(environment_key, "-", ""))
     display_name                                 = environment_value.display_name
-    runner_name                                  = local.is_self_hosted ? local.self_hosted_runner_name : "ubuntu-latest"
+    runner_name                                  = local.is_self_hosted ? local.effective_runner_group_name : "ubuntu-latest"
     environment_name_read                        = "${environment_key}-read"
     environment_name_write                       = "${environment_key}-write"
     dependent_environment                        = environment_value.dependent_environment
@@ -38,10 +38,9 @@ locals {
   pipeline_template_replacements = {
     environments = local.environment_replacements
   }
-  primary_approver        = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
-  self_hosted_runner_name = var.runner_existing_group_name != null ? "group: ${var.runner_existing_group_name}" : (local.use_runner_group ? "group: ${local.resource_names.runner_group_name}" : "self-hosted")
-  target_folder_name      = ".github"
-  template_folder         = var.example_module_path
+  primary_approver   = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
+  target_folder_name = ".github"
+  template_folder    = var.example_module_path
 }
 
 resource "github_repository_file" "this" {

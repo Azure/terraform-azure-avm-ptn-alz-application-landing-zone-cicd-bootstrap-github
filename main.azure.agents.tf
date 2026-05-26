@@ -1,6 +1,6 @@
 module "azure_devops_agents" {
   source  = "Azure/avm-ptn-cicd-agents-and-runners/azurerm"
-  version = "0.5.2"
+  version = "0.6.0"
   count   = local.create_agent_infrastructure ? 1 : 0
 
   location                                                  = var.location
@@ -9,7 +9,7 @@ module "azure_devops_agents" {
   version_control_system_type                               = "github"
   compute_types                                             = [var.runner_compute_type]
   container_app_subnet_id                                   = local.effective_agents_subnet_id
-  container_instance_count                                  = 4
+  container_instance_count                                  = var.runner_container_instance_count
   container_instance_name_prefix                            = local.resource_names.container_instance_prefix_name
   container_instance_subnet_id                              = local.effective_agents_subnet_id
   container_instance_use_availability_zones                 = var.runner_compute_use_availability_zones

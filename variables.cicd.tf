@@ -1,9 +1,3 @@
-# --- Repositories ---
-
-# --- Deployment Mode ---
-
-# --- Workflow Templates ---
-
 variable "bicep_deployments" {
   type = list(object({
     name                = string

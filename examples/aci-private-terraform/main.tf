@@ -41,8 +41,8 @@ module "test" {
 
   github_organization_name = var.github_organization_name
   location                 = var.location
-  compute_type             = "azure_container_instance"
   enable_telemetry         = var.enable_telemetry
   example_module_path      = "${path.root}/../../example-repos/terraform"
+  runner_compute_type      = "azure_container_instance"
   runner_use_self_hosted   = true
 }

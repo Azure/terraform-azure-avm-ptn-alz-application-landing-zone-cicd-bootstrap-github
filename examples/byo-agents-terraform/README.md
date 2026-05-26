@@ -15,7 +15,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "~> 6.5"
+      version = "~> 6.11"
     }
     modtm = {
       source  = "azure/modtm"
@@ -40,9 +40,7 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {
-  owner = var.github_organization_name
-}
+provider "github" {}
 
 # BYO runner group with Terraform workflows (no self-hosted infra created)
 module "test" {
@@ -65,7 +63,7 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
-- <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.5)
+- <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.11)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
