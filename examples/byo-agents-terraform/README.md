@@ -42,7 +42,28 @@ provider "azurerm" {
 
 provider "github" {}
 
-# BYO runner group with Terraform workflows (no self-hosted infra created)
+locals {
+  byo_environment  = "test"
+  byo_workload     = "byob"
+  seed_environment = "seed"
+  seed_workload    = "byrg"
+}
+
+# Seed deployment: create self-hosted runner infrastructure including a runner group.
+module "seed" {
+  source = "../../"
+
+  github_organization_name          = var.github_organization_name
+  location                          = var.location
+  enable_telemetry                  = var.enable_telemetry
+  github_create_main_repository     = false
+  github_create_template_repository = false
+  resource_name_environment         = local.seed_environment
+  resource_name_workload            = local.seed_workload
+  runner_create_group               = true
+}
+
+# BYO deployment: consume the runner group from the seed module.
 module "test" {
   source = "../../"
 
@@ -50,7 +71,9 @@ module "test" {
   location                   = var.location
   enable_telemetry           = var.enable_telemetry
   example_module_path        = "${path.root}/../../example-repos/terraform"
-  runner_existing_group_name = "my-existing-runner-group"
+  resource_name_environment  = local.byo_environment
+  resource_name_workload     = local.byo_workload
+  runner_existing_group_name = module.seed.runner_group_name
 }
 ```
 
@@ -113,6 +136,12 @@ No outputs.
 ## Modules
 
 The following Modules are called:
+
+### <a name="module_seed"></a> [seed](#module\_seed)
+
+Source: ../../
+
+Version:
 
 ### <a name="module_test"></a> [test](#module\_test)
 

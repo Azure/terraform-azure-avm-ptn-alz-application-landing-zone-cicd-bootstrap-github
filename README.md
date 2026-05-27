@@ -350,6 +350,14 @@ Type: `string`
 
 Default: `null`
 
+### <a name="input_github_create_main_repository"></a> [github\_create\_main\_repository](#input\_github\_create\_main\_repository)
+
+Description: Whether to create and manage the main repository and repository-scoped CI/CD resources.
+
+Type: `bool`
+
+Default: `true`
+
 ### <a name="input_github_create_template_repository"></a> [github\_create\_template\_repository](#input\_github\_create\_template\_repository)
 
 Description: Whether to create a template repository for CI/CD workflow templates. Set to false if you don't need a template repository.
@@ -550,6 +558,10 @@ Description: The list of approvers matched from the organization.
 ### <a name="output_managed_identity_client_ids"></a> [managed\_identity\_client\_ids](#output\_managed\_identity\_client\_ids)
 
 Description: A map of managed identity client IDs for each environment split (plan/apply).
+
+### <a name="output_runner_group_name"></a> [runner\_group\_name](#output\_runner\_group\_name)
+
+Description: The GitHub Actions runner group name used by this deployment.
 
 ### <a name="output_subscription_id"></a> [subscription\_id](#output\_subscription\_id)
 

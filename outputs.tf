@@ -5,7 +5,12 @@ output "approvers" {
 
 output "managed_identity_client_ids" {
   description = "A map of managed identity client IDs for each environment split (plan/apply)."
-  value       = { for env_key, env_value in local.environment_split : env_key => module.user_assigned_managed_identity[env_key].client_id }
+  value       = local.create_main_repository ? { for env_key, env_value in local.environment_split : env_key => module.user_assigned_managed_identity[env_key].client_id } : {}
+}
+
+output "runner_group_name" {
+  description = "The GitHub Actions runner group name used by this deployment."
+  value       = var.runner_existing_group_name != null ? var.runner_existing_group_name : (local.use_runner_group ? github_actions_runner_group.this[0].name : null)
 }
 
 output "subscription_id" {

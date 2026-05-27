@@ -3,9 +3,9 @@ locals {
 }
 
 resource "github_repository_environment" "this" {
-  for_each    = local.environment_split
+  for_each    = local.create_main_repository ? local.environment_split : {}
   environment = each.key
-  repository  = github_repository.this.name
+  repository  = github_repository.this[0].name
 
   dynamic "reviewers" {
     for_each = each.value.type == local.write_key && each.value.has_approval && local.has_approvers ? [1] : []

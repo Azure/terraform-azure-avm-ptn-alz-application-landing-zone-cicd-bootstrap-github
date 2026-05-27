@@ -1,7 +1,7 @@
 module "user_assigned_managed_identity" {
   source   = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
   version  = "0.5.0"
-  for_each = local.environment_split
+  for_each = local.create_main_repository ? local.environment_split : {}
 
   location            = var.location
   name                = each.value.user_assigned_managed_identity_name
@@ -10,20 +10,20 @@ module "user_assigned_managed_identity" {
 
 locals {
   federated_credentials = merge(local.federated_credentials_with_templates, local.federated_credentials_without_templates)
-  federated_credentials_with_templates = { for federated_credential in flatten([for env_key, env_value in local.environment_split : [
+  federated_credentials_with_templates = local.create_main_repository ? { for federated_credential in flatten([for env_key, env_value in local.environment_split : [
     for template in env_value.required_templates : {
       composite_key                     = "${env_key}-${template}"
       federated_credential_name         = "${env_value.federated_credential_name}-${substr(sha1(template), 0, 8)}"
       user_assigned_managed_identity_id = module.user_assigned_managed_identity[env_key].resource_id
-      subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this.repo_id}:environment:${env_key}:job_workflow_ref:${format(local.template_claim_structure, template)}"
+      subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this[0].repo_id}:environment:${env_key}:job_workflow_ref:${format(local.template_claim_structure, template)}"
     }
-  ]]) : federated_credential.composite_key => federated_credential }
-  federated_credentials_without_templates = { for env_key, env_value in local.environment_split : env_key => {
+  ]]) : federated_credential.composite_key => federated_credential } : {}
+  federated_credentials_without_templates = local.create_main_repository ? { for env_key, env_value in local.environment_split : env_key => {
     composite_key                     = env_key
     federated_credential_name         = env_value.federated_credential_name
     user_assigned_managed_identity_id = module.user_assigned_managed_identity[env_key].resource_id
-    subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this.repo_id}:environment:${env_key}"
-  } if length(env_value.required_templates) == 0 }
+    subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this[0].repo_id}:environment:${env_key}"
+  } if length(env_value.required_templates) == 0 } : {}
   template_claim_structure = "${data.github_organization.this.login}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
 }
 

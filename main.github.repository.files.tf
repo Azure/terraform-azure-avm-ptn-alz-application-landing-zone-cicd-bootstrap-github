@@ -44,8 +44,8 @@ locals {
 }
 
 resource "github_repository_file" "this" {
-  for_each            = local.main_repository_files
-  repository          = github_repository.this.name
+  for_each            = local.create_main_repository ? local.main_repository_files : {}
+  repository          = github_repository.this[0].name
   file                = each.key
   content             = each.value.content
   commit_author       = local.default_commit_email
@@ -55,7 +55,7 @@ resource "github_repository_file" "this" {
 }
 
 resource "github_repository_file" "template" {
-  for_each            = local.create_template_repository ? local.pipeline_template_files : {}
+  for_each            = local.create_main_repository && local.create_template_repository ? local.pipeline_template_files : {}
   repository          = github_repository.template[0].name
   file                = each.key
   content             = each.value.content

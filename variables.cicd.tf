@@ -38,6 +38,12 @@ variable "example_module_path" {
   description = "The absolute path to the example module to seed into the created repository."
 }
 
+variable "github_create_main_repository" {
+  type        = bool
+  default     = true
+  description = "Whether to create and manage the main repository and repository-scoped CI/CD resources."
+}
+
 variable "github_create_template_repository" {
   type        = bool
   default     = true

@@ -22,11 +22,9 @@ module "azure_devops_agents" {
   version_control_system_github_application_installation_id = var.runner_authentication_method == "github_app" ? var.github_app_installation_id : null
   version_control_system_github_application_key             = var.runner_authentication_method == "github_app" ? var.github_app_key : null
   version_control_system_personal_access_token              = var.runner_authentication_method == "pat" ? var.runner_personal_access_token : null
-  version_control_system_repository                         = github_repository.this.name
+  version_control_system_repository                         = local.create_main_repository ? github_repository.this[0].name : local.resource_names.repository_main_name
   version_control_system_runner_group                       = local.use_runner_group ? github_actions_runner_group.this[0].name : null
-  version_control_system_runner_scope                       = local.use_runner_group ? "org" : "repo"
+  version_control_system_runner_scope                       = local.use_runner_group ? "org" : (local.create_main_repository ? "repo" : "org")
   virtual_network_creation_enabled                          = false
   virtual_network_id                                        = local.effective_vnet_resource_id
-
-  depends_on = [github_repository_file.this]
 }

@@ -4,6 +4,7 @@ locals {
 }
 
 resource "github_repository" "this" {
+  count               = local.create_main_repository ? 1 : 0
   name                = local.resource_names.repository_main_name
   description         = local.resource_names.repository_main_name
   auto_init           = true
@@ -14,18 +15,20 @@ resource "github_repository" "this" {
 }
 
 resource "github_repository_vulnerability_alerts" "this" {
-  repository = github_repository.this.name
+  count      = local.create_main_repository ? 1 : 0
+  repository = github_repository.this[0].name
   enabled    = true
 }
 
 resource "github_actions_repository_oidc_subject_claim_customization_template" "this" {
-  repository         = github_repository.this.name
+  count              = local.create_main_repository ? 1 : 0
+  repository         = github_repository.this[0].name
   use_default        = false
   include_claim_keys = ["repository_owner_id", "repository_id", "environment", "job_workflow_ref"]
 }
 
 resource "github_repository" "template" {
-  count               = local.create_template_repository ? 1 : 0
+  count               = local.create_main_repository && local.create_template_repository ? 1 : 0
   name                = local.resource_names.repository_template_name
   description         = local.resource_names.repository_template_name
   auto_init           = true
@@ -36,14 +39,15 @@ resource "github_repository" "template" {
 }
 
 resource "github_repository_vulnerability_alerts" "template" {
-  count      = local.create_template_repository ? 1 : 0
+  count      = local.create_main_repository && local.create_template_repository ? 1 : 0
   repository = github_repository.template[0].name
   enabled    = true
 }
 
 resource "github_branch_protection" "this" {
+  count                           = local.create_main_repository ? 1 : 0
   depends_on                      = [github_repository_file.this]
-  repository_id                   = github_repository.this.name
+  repository_id                   = github_repository.this[0].name
   pattern                         = "main"
   enforce_admins                  = true
   required_linear_history         = true
@@ -57,7 +61,7 @@ resource "github_branch_protection" "this" {
 }
 
 resource "github_branch_protection" "template" {
-  count                           = local.create_template_repository ? 1 : 0
+  count                           = local.create_main_repository && local.create_template_repository ? 1 : 0
   depends_on                      = [github_repository_file.template]
   repository_id                   = github_repository.template[0].name
   pattern                         = "main"
@@ -73,7 +77,7 @@ resource "github_branch_protection" "template" {
 }
 
 resource "github_actions_repository_access_level" "this" {
-  count        = local.create_template_repository && data.github_organization.this.plan == local.enterprise_plan ? 1 : 0
+  count        = local.create_main_repository && local.create_template_repository && data.github_organization.this.plan == local.enterprise_plan ? 1 : 0
   access_level = "organization"
   repository   = github_repository.template[0].name
 }

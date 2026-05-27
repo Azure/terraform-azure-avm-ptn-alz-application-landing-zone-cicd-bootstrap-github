@@ -30,8 +30,8 @@ resource "github_team_membership" "this" {
 }
 
 resource "github_team_repository" "this" {
-  count      = local.create_approval_team ? 1 : 0
+  count      = local.create_approval_team && local.create_main_repository ? 1 : 0
   team_id    = github_team.this[0].id
-  repository = github_repository.this.name
+  repository = github_repository.this[0].name
   permission = "push"
 }
