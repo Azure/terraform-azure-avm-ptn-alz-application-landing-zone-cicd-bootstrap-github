@@ -21,17 +21,14 @@ github_organization_name="${AVM_E2E_GITHUB_ORGANIZATION_NAME:-Azure}"
   # Self-hosted runner registration uses GitHub App credentials. Real secrets are only
   # available in the examples/integration tests; the well-architected plan check runs
   # without them. terraform plan never authenticates with these values (they are passed
-  # through to the agents module as strings), so when the real secrets are absent we emit
-  # non-functional placeholders purely to satisfy variable validation. Any real
-  # TF_VAR_github_app_* provided via the environment takes precedence and is left as-is
-  # (the private key stays in the environment so its multi-line value is not written here).
-  if [ -z "${TF_VAR_github_app_id:-}" ]; then
-    echo "TF_VAR_github_app_id=123456"
-  fi
-  if [ -z "${TF_VAR_github_app_installation_id:-}" ]; then
-    echo "TF_VAR_github_app_installation_id=654321"
-  fi
+  # through to the agents module as strings), so we forward the real AVM_E2E_* secrets when
+  # present and otherwise emit non-functional placeholders purely to satisfy variable
+  # validation. An explicit TF_VAR_github_app_* in the environment always takes precedence.
+  echo "TF_VAR_github_app_id=${TF_VAR_github_app_id:-${AVM_E2E_GITHUB_APP_ID:-123456}}"
+  echo "TF_VAR_github_app_installation_id=${TF_VAR_github_app_installation_id:-${AVM_E2E_GITHUB_APP_INSTALLATION_ID:-654321}}"
   if [ -z "${TF_VAR_github_app_key:-}" ]; then
-    echo "TF_VAR_github_app_key=placeholder-github-app-key-not-used-during-plan"
+    # The private key may be a multi-line PEM. A single-line placeholder satisfies the
+    # plan-time variable validation; a real AVM_E2E_GITHUB_APP_KEY overrides it at test time.
+    echo "TF_VAR_github_app_key=${AVM_E2E_GITHUB_APP_KEY:-placeholder-github-app-key-not-used-during-plan}"
   fi
 } > .env
