@@ -13,7 +13,7 @@ locals {
       user_assigned_managed_identity_name = coalesce(
         identity_value.name,
         templatestring(var.resource_name_templates["identity_${identity_key}_name"], merge(local.name_replacements, {
-          environment = env_key
+          environment = "${var.resource_name_environment}-${env_key}"
         }))
       )
       federated_credential_name = "${local.resource_names.federated_credential_name}-${env_key}-${identity_key}"
@@ -30,7 +30,7 @@ locals {
     create_resource_group = value.scope == "resource_group" && value.resource_id == null && value.resource_group_create
     identities            = value.identities
     resource_group_name = coalesce(value.resource_group_name, templatestring(var.resource_name_templates.resource_group_env_name, merge(local.name_replacements, {
-      environment = key
+      environment = "${var.resource_name_environment}-${key}"
     })))
   } }
 }
