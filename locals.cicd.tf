@@ -11,5 +11,6 @@ locals {
     ci = { main_file = "workflows/ci.yaml", template_path = ".github/workflows/ci-template.yaml" }
     cd = { main_file = "workflows/cd.yaml", template_path = ".github/workflows/cd-template.yaml" }
   })
-  has_approvers = var.github_existing_approvers_team_id != null || length(var.approvers) > 0
+  has_approvers     = var.github_existing_approvers_team_id != null || length(var.approvers) > 0
+  has_template_repo = var.github_existing_template_repository_name != null || local.create_template_repository
 }
