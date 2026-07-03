@@ -69,8 +69,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.9)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
-
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.12)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
@@ -558,6 +556,10 @@ Description: The list of approvers matched from the organization.
 ### <a name="output_managed_identity_client_ids"></a> [managed\_identity\_client\_ids](#output\_managed\_identity\_client\_ids)
 
 Description: A map of managed identity client IDs for each environment split (plan/apply).
+
+### <a name="output_resource_id"></a> [resource\_id](#output\_resource\_id)
+
+Description: The resource ID of the identity resource group, which is the anchor Azure resource created by this module to host the CI/CD managed identities.
 
 ### <a name="output_runner_group_name"></a> [runner\_group\_name](#output\_runner\_group\_name)
 

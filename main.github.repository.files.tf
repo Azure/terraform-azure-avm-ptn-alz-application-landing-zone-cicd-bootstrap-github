@@ -35,12 +35,9 @@ locals {
     content = file("${local.pipeline_template_folder}/${file}")
   } } : {}
   pipeline_template_folder = local.effective_workflow_folder != null ? "${local.effective_workflow_folder}/templates" : null
-  pipeline_template_replacements = {
-    environments = local.environment_replacements
-  }
-  primary_approver   = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
-  target_folder_name = ".github"
-  template_folder    = var.example_module_path
+  primary_approver         = length(var.approvers) > 0 ? var.approvers[keys(var.approvers)[0]] : ""
+  target_folder_name       = ".github"
+  template_folder          = var.example_module_path
 }
 
 resource "github_repository_file" "this" {
