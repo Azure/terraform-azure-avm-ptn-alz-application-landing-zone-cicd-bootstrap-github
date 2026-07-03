@@ -39,4 +39,9 @@ module "test" {
   example_module_path      = "${path.root}/../../example-repos/terraform"
   runner_compute_type      = "azure_container_instance"
   runner_use_self_hosted   = true
+  resource_name_workload   = "acip"
+
+  github_app_id              = var.github_app_id
+  github_app_installation_id = var.github_app_installation_id
+  github_app_key             = var.github_app_key
 }

@@ -18,3 +18,22 @@ variable "location" {
   default     = "uksouth"
   description = "The location/region where the resources will be created."
 }
+
+variable "github_app_id" {
+  type        = string
+  default     = null
+  description = "The application ID for GitHub App authentication."
+}
+
+variable "github_app_installation_id" {
+  type        = string
+  default     = null
+  description = "The installation ID for GitHub App authentication."
+}
+
+variable "github_app_key" {
+  type        = string
+  default     = null
+  description = "The private key for GitHub App authentication."
+  sensitive   = true
+}

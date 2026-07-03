@@ -69,6 +69,7 @@ module "test" {
     }
   }
   runner_use_self_hosted = false
+  resource_name_workload = "minw"
 }
 ```
 

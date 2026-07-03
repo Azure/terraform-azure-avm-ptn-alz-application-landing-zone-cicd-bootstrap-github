@@ -55,6 +55,10 @@ module "seed" {
   resource_name_environment         = local.seed_environment
   resource_name_workload            = local.seed_workload
   runner_create_group               = true
+
+  github_app_id              = var.github_app_id
+  github_app_installation_id = var.github_app_installation_id
+  github_app_key             = var.github_app_key
 }
 
 # BYO deployment: consume the runner group from the seed module.
@@ -68,6 +72,10 @@ module "test" {
   resource_name_environment  = local.byo_environment
   resource_name_workload     = local.byo_workload
   runner_existing_group_name = module.seed.runner_group_name
+
+  github_app_id              = var.github_app_id
+  github_app_installation_id = var.github_app_installation_id
+  github_app_key             = var.github_app_key
 }
 ```
 
@@ -110,6 +118,30 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_github_app_id"></a> [github\_app\_id](#input\_github\_app\_id)
+
+Description: The application ID for GitHub App authentication.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_github_app_installation_id"></a> [github\_app\_installation\_id](#input\_github\_app\_installation\_id)
+
+Description: The installation ID for GitHub App authentication.
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_github_app_key"></a> [github\_app\_key](#input\_github\_app\_key)
+
+Description: The private key for GitHub App authentication.
+
+Type: `string`
+
+Default: `null`
 
 ### <a name="input_location"></a> [location](#input\_location)
 

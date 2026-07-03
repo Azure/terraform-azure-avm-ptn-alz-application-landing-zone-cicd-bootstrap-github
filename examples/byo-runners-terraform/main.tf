@@ -48,6 +48,10 @@ module "seed" {
   resource_name_environment         = local.seed_environment
   resource_name_workload            = local.seed_workload
   runner_create_group               = true
+
+  github_app_id              = var.github_app_id
+  github_app_installation_id = var.github_app_installation_id
+  github_app_key             = var.github_app_key
 }
 
 # BYO deployment: consume the runner group from the seed module.
@@ -61,4 +65,8 @@ module "test" {
   resource_name_environment  = local.byo_environment
   resource_name_workload     = local.byo_workload
   runner_existing_group_name = module.seed.runner_group_name
+
+  github_app_id              = var.github_app_id
+  github_app_installation_id = var.github_app_installation_id
+  github_app_key             = var.github_app_key
 }
