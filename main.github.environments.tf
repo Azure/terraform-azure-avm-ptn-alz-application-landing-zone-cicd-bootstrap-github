@@ -3,7 +3,8 @@ locals {
 }
 
 resource "github_repository_environment" "this" {
-  for_each    = local.create_main_repository ? local.environment_split : {}
+  for_each = local.create_main_repository ? local.environment_split : {}
+
   environment = each.key
   repository  = github_repository.this[0].name
 

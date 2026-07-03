@@ -9,7 +9,8 @@ locals {
 }
 
 resource "github_team" "this" {
-  count       = local.create_approval_team ? 1 : 0
+  count = local.create_approval_team ? 1 : 0
+
   name        = local.resource_names.team_name
   description = "Approvers for the Landing Zone Terraform Apply"
   privacy     = "closed"
@@ -24,13 +25,15 @@ resource "github_team" "this" {
 
 resource "github_team_membership" "this" {
   for_each = local.create_approval_team ? { for approver in local.approvers : approver.login => approver } : {}
+
   team_id  = github_team.this[0].id
   username = each.value.login
   role     = "member"
 }
 
 resource "github_team_repository" "this" {
-  count      = local.create_approval_team && local.create_main_repository ? 1 : 0
+  count = local.create_approval_team && local.create_main_repository ? 1 : 0
+
   team_id    = github_team.this[0].id
   repository = github_repository.this[0].name
   permission = "push"
