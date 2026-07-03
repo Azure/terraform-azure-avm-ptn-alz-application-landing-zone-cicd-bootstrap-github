@@ -16,6 +16,11 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 
+# Local .env file written by the example pre.sh hooks to pass secrets (such as
+# GITHUB_TOKEN) to the terraform steps. It is generated at test time and must
+# never be committed.
+.env
+
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
 override.tf
