@@ -42,7 +42,7 @@ module "resource_group_environments" {
       role         = ra_value.role_definition_id_or_name
       principal_id = module.user_assigned_managed_identity["${each.key}-${identity_key}"].principal_id
     }
-    ] if each.value.identities[identity_key].enabled]) : ra.key => {
+    ] if each.value.identities[identity_key].enabled && local.create_main_repository]) : ra.key => {
     role_definition_id_or_name = ra.role
     principal_id               = ra.principal_id
   } }
@@ -58,7 +58,7 @@ locals {
         role_definition_id_or_name = ra_value.role_definition_id_or_name
         principal_id               = module.user_assigned_managed_identity["${env_key}-${identity_key}"].principal_id
       }
-    ] if env_value.identities[identity_key].enabled
+    ] if env_value.identities[identity_key].enabled && local.create_main_repository
   ]]) : ra.key => ra }
 }
 
