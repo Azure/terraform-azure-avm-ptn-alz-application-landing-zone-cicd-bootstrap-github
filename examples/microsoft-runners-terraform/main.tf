@@ -10,6 +10,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -29,6 +33,13 @@ provider "github" {
   owner = var.github_organization_name
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
 # GitHub-hosted runners with Terraform workflows (no self-hosted infra)
 module "test" {
   source = "../../"
@@ -38,5 +49,5 @@ module "test" {
   enable_telemetry         = var.enable_telemetry
   example_module_path      = "${path.root}/../../example-repos/terraform"
   runner_use_self_hosted   = false
-  resource_name_workload   = "msru"
+  resource_name_workload   = random_string.workload.result
 }

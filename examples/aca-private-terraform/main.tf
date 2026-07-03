@@ -10,6 +10,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -29,6 +33,13 @@ provider "github" {
   owner = var.github_organization_name
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
 # ACA with private networking and Terraform workflows
 module "test" {
   source = "../../"
@@ -39,7 +50,7 @@ module "test" {
   example_module_path      = "${path.root}/../../example-repos/terraform"
   runner_compute_type      = "azure_container_app"
   runner_use_self_hosted   = true
-  resource_name_workload   = "acap"
+  resource_name_workload   = random_string.workload.result
 
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id

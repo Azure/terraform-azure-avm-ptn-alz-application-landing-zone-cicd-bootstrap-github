@@ -10,6 +10,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -31,9 +35,23 @@ provider "github" {
 
 locals {
   byo_environment  = "test"
-  byo_workload     = "byob"
+  byo_workload     = random_string.byo_workload.result
   seed_environment = "seed"
-  seed_workload    = "byrg"
+  seed_workload    = random_string.seed_workload.result
+}
+
+resource "random_string" "byo_workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
+resource "random_string" "seed_workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
 }
 
 # Seed deployment: create self-hosted runner infrastructure including a runner group.

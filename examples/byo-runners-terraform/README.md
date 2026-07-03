@@ -17,6 +17,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -38,9 +42,23 @@ provider "github" {
 
 locals {
   byo_environment  = "test"
-  byo_workload     = "byob"
+  byo_workload     = random_string.byo_workload.result
   seed_environment = "seed"
-  seed_workload    = "byrg"
+  seed_workload    = random_string.seed_workload.result
+}
+
+resource "random_string" "byo_workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
+resource "random_string" "seed_workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
 }
 
 # Seed deployment: create self-hosted runner infrastructure including a runner group.
@@ -90,9 +108,14 @@ The following requirements are needed by this module:
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.11)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
+
 ## Resources
 
-No resources.
+The following resources are used by this module:
+
+- [random_string.byo_workload](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
+- [random_string.seed_workload](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs

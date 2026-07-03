@@ -10,6 +10,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -29,6 +33,13 @@ provider "github" {
   owner = var.github_organization_name
 }
 
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
+
 # This is the module call
 module "test" {
   source = "../../"
@@ -37,6 +48,6 @@ module "test" {
   location                 = var.location
   enable_telemetry         = var.enable_telemetry
   example_module_path      = "${path.root}/../../example-repos/terraform"
-  resource_name_workload   = "mint"
+  resource_name_workload   = random_string.workload.result
   runner_use_self_hosted   = false
 }

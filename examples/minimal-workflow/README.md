@@ -21,6 +21,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -41,6 +45,13 @@ provider "github" {
 }
 
 data "azapi_client_config" "current" {}
+
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
 
 # Minimal example: single write identity, GitHub-hosted runners, no template repo, custom workflow
 module "test" {
@@ -69,7 +80,7 @@ module "test" {
     }
   }
   runner_use_self_hosted = false
-  resource_name_workload = "minw"
+  resource_name_workload = random_string.workload.result
 }
 ```
 
@@ -86,10 +97,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.11)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
+
 ## Resources
 
 The following resources are used by this module:
 
+- [random_string.workload](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 
 <!-- markdownlint-disable MD013 -->

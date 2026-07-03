@@ -14,6 +14,10 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
   }
 }
 
@@ -34,6 +38,13 @@ provider "github" {
 }
 
 data "azapi_client_config" "current" {}
+
+resource "random_string" "workload" {
+  length  = 4
+  numeric = false
+  special = false
+  upper   = false
+}
 
 # Minimal example: single write identity, GitHub-hosted runners, no template repo, custom workflow
 module "test" {
@@ -62,5 +73,5 @@ module "test" {
     }
   }
   runner_use_self_hosted = false
-  resource_name_workload = "minw"
+  resource_name_workload = random_string.workload.result
 }
