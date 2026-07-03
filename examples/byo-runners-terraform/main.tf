@@ -25,7 +25,9 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {}
+provider "github" {
+  owner = var.github_organization_name
+}
 
 locals {
   byo_environment  = "test"

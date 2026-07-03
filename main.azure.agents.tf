@@ -15,6 +15,7 @@ module "azure_devops_agents" {
   container_instance_use_availability_zones                 = var.runner_compute_use_availability_zones
   container_registry_name                                   = local.resource_names.container_registry_name
   container_registry_private_endpoint_subnet_id             = local.effective_pe_subnet_id
+  parent_id                                                 = local.create_vnet_infrastructure ? module.resource_group["agents"].resource_id : null
   resource_group_creation_enabled                           = !local.create_vnet_infrastructure
   resource_group_name                                       = local.create_vnet_infrastructure ? module.resource_group["agents"].name : null
   version_control_system_authentication_method              = var.runner_authentication_method

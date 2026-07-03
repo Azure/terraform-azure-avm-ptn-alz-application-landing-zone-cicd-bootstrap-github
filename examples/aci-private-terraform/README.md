@@ -32,7 +32,9 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {}
+provider "github" {
+  owner = var.github_organization_name
+}
 
 # ACI with private networking and Terraform workflows
 module "test" {

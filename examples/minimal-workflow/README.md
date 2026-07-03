@@ -36,7 +36,9 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {}
+provider "github" {
+  owner = var.github_organization_name
+}
 
 data "azapi_client_config" "current" {}
 

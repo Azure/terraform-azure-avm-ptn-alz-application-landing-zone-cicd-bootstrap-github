@@ -32,7 +32,9 @@ provider "azurerm" {
   storage_use_azuread = true
 }
 
-provider "github" {}
+provider "github" {
+  owner = var.github_organization_name
+}
 
 # GitHub-hosted runners with Terraform workflows (no self-hosted infra)
 module "test" {

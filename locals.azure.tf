@@ -9,5 +9,5 @@ locals {
   effective_vnet_resource_id  = var.azure_existing_virtual_network_resource_id != null ? var.azure_existing_virtual_network_resource_id : (local.create_vnet_infrastructure ? module.virtual_network[0].resource_id : null)
   github_issuer_url           = "https://token.actions.githubusercontent.com"
   is_self_hosted              = var.runner_use_self_hosted || var.runner_existing_group_name != null
-  use_private_networking      = local.effective_vnet_resource_id != null
+  use_private_networking      = var.azure_existing_virtual_network_resource_id != null || local.create_vnet_infrastructure
 }
