@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# The github provider requires GITHUB_TOKEN in the environment. It is supplied
-# via the AVM_E2E_GITHUB_TOKEN secret (non-TF_VAR_ env var) so that TF_VAR_*
-# token variables are limited to legacy PAT support for runner registration
-# via var.runner_personal_access_token.
-#
-# Porch runs each hook and terraform step in its own subprocess, so exporting
-# the variable here would not reach the terraform steps. Instead we write a
-# .env file, which the terraform init/plan steps auto-source.
+# Runs before the terraform steps for this example in AVM CI (well-architected plan
+# and examples tests). It writes a .env file that the terraform steps auto-source, so
+# values that must come from the environment are supplied without being committed.
+# See: https://github.com/Azure/avm-terraform-governance/blob/main/porch-configs/README.md
 set -euo pipefail
 
-if [ -n "${AVM_E2E_GITHUB_TOKEN:-}" ]; then
-  cat > .env <<EOF
-GITHUB_TOKEN=${AVM_E2E_GITHUB_TOKEN}
-EOF
-fi
+# This module requires a real, pre-existing GitHub organization because
+# data.github_organization performs a live lookup at plan time. In AVM CI the target
+# organization is provided via the AVM_E2E_GITHUB_ORGANIZATION_NAME secret; fall back to
+# the ambient organization ("Azure") so `terraform plan` can always resolve.
+github_organization_name="${AVM_E2E_GITHUB_ORGANIZATION_NAME:-Azure}"
+
+{
+  echo "TF_VAR_github_organization_name=${github_organization_name}"
+  if [ -n "${AVM_E2E_GITHUB_TOKEN:-}" ]; then
+    echo "GITHUB_TOKEN=${AVM_E2E_GITHUB_TOKEN}"
+    echo "GITHUB_OWNER=${github_organization_name}"
+  fi
+} > .env
