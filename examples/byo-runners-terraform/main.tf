@@ -48,6 +48,7 @@ module "seed" {
   resource_name_environment         = local.seed_environment
   resource_name_workload            = local.seed_workload
   runner_create_group               = true
+  runner_container_instance_count   = 1
 
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id
@@ -58,13 +59,14 @@ module "seed" {
 module "test" {
   source = "../../"
 
-  github_organization_name   = var.github_organization_name
-  location                   = var.location
-  enable_telemetry           = var.enable_telemetry
-  example_module_path        = "${path.root}/../../example-repos/terraform"
-  resource_name_environment  = local.byo_environment
-  resource_name_workload     = local.byo_workload
-  runner_existing_group_name = module.seed.runner_group_name
+  github_organization_name        = var.github_organization_name
+  location                        = var.location
+  enable_telemetry                = var.enable_telemetry
+  example_module_path             = "${path.root}/../../example-repos/terraform"
+  resource_name_environment       = local.byo_environment
+  resource_name_workload          = local.byo_workload
+  runner_existing_group_name      = module.seed.runner_group_name
+  runner_container_instance_count = 1
 
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id
