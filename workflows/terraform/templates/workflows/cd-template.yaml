@@ -1,0 +1,193 @@
+---
+name: Continuous Delivery
+on:
+  workflow_call:
+    inputs:
+      terraform_action:
+        description: 'Terraform Action to perform'
+        default: 'apply'
+        type: string
+      name:
+        description: 'Environment Details'
+        type: string
+        default: ''
+      display_name:
+        description: 'Environment Display Name'
+        type: string
+        default: ''
+      runner_name:
+        description: 'Runner Name'
+        type: string
+        default: ''
+      environment_name_read:
+        description: 'Environment Name Plan'
+        type: string
+        default: ''
+      environment_name_write:
+        description: 'Environment Name Apply'
+        type: string
+        default: ''
+      dependent_environment:
+        description: 'Dependent Environment'
+        type: string
+        default: ''
+      backend_azure_storage_account_container_name:
+        description: 'Backend Azure Storage Account Container Name'
+        type: string
+        default: ''
+      root_module_folder_relative_path:
+        description: 'Root Module Folder Relative Path'
+        default: '.'
+        type: string
+      terraform_cli_version:
+        description: 'Terraform CLI Version'
+        default: 'latest'
+        type: string
+
+jobs:
+  plan:
+    name: Plan with Terraform
+    runs-on:
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    environment: ${{ inputs.environment_name_read }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: ${{ inputs.terraform_cli_versions }}
+
+      - name: Terraform Init
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
+          init `
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="key=terraform.tfstate"
+
+      - name: Terraform Plan for ${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        shell: pwsh
+        run: |
+          $additionalVariables = ConvertFrom-Json '${{ vars.ADDITIONAL_ENVIRONMENT_VARIABLES }}'
+          foreach($var in $additionalVariables.PSObject.Properties) {
+            if($var.Name.StartsWith("TF_VAR_")) {
+              Write-Host "Setting: $($var.Name) = $($var.Value)"
+              [System.Environment]::SetEnvironmentVariable($var.Name, $var.Value)
+            }
+          }
+
+          $varFilePath = "${{ vars.VAR_FILE_PATH }}"
+          $action = "${{ inputs.terraform_action }}"
+
+          # Run Terraform Plan
+          $command = "terraform"
+          $arguments = @()
+          $arguments += "-chdir=${{ inputs.root_module_folder_relative_path }}"
+          $arguments += "plan"
+
+          if($varFilePath -ne "") {
+            $arguments += "-var-file=$varFilePath"
+          }
+
+          $arguments += "-out=tfplan"
+          $arguments += "-input=false"
+
+          if ($action -eq 'destroy') {
+            $arguments += "-destroy"
+          }
+
+          Write-Host "Running: $command $arguments"
+          & $command $arguments
+
+      - name: Create Module Artifact
+        shell: pwsh
+        run: |
+          $stagingDirectory = "staging"
+          $rootModuleFolder = "${{inputs.root_module_folder_relative_path}}"
+          New-Item -Path . -Name $stagingDirectory -ItemType "directory"
+          Copy-Item -Path "./*" -Exclude @(".git", ".terraform", ".github", $stagingDirectory) -Recurse -Destination "./$stagingDirectory"
+
+          $rootModuleFolderTerraformFolder = Join-Path -Path "./$stagingDirectory" -ChildPath $rootModuleFolder -AdditionalChildPath ".terraform"
+          if(Test-Path -Path $rootModuleFolderTerraformFolder) {
+            Remove-Item -Path $rootModuleFolderTerraformFolder -Recurse -Force
+          }
+
+      - name: Publish Module Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: module_${{ inputs.name }}
+          path: ./staging/
+
+      - name: Show the Plan for Review
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
+          show `
+          tfplan
+
+  apply:
+    name: Apply with Terraform
+    needs: plan
+    runs-on:
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}
+    environment: ${{ inputs.environment_name_write }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ARM_CLIENT_ID: "${{ vars.AZURE_CLIENT_ID }}"
+      ARM_SUBSCRIPTION_ID: "${{ vars.AZURE_SUBSCRIPTION_ID }}"
+      ARM_TENANT_ID: "${{ vars.AZURE_TENANT_ID }}"
+      ARM_USE_AZUREAD: true
+      ARM_USE_OIDC: true
+      AZAPI_RETRY_GET_AFTER_PUT_MAX_TIME: "60m"
+
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: module_${{ inputs.name }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+          terraform_version: ${{ inputs.terraform_cli_versions }}
+
+      - name: Terraform Init
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
+          init `
+          -backend-config="storage_account_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_NAME}}" `
+          -backend-config="container_name=${{vars.BACKEND_AZURE_STORAGE_ACCOUNT_CONTAINER_NAME}}" `
+          -backend-config="key=terraform.tfstate"
+
+      - name: Terraform ${{ inputs.terraform_action == 'destroy' && 'Destroy' || 'Apply' }}
+        shell: pwsh
+        run: |
+          terraform `
+          -chdir="${{inputs.root_module_folder_relative_path}}" `
+          apply `
+          -input=false `
+          -auto-approve `
+          tfplan

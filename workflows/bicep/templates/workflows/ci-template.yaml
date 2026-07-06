@@ -1,0 +1,89 @@
+---
+name: Continuous Integration
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: 'Environment Details'
+        type: string
+        default: ''
+      display_name:
+        description: 'Environment Display Name'
+        type: string
+        default: ''
+      runner_name:
+        description: 'Runner Name'
+        type: string
+        default: ''
+      environment_name_read:
+        description: 'Environment Name Plan'
+        type: string
+        default: ''
+      environment_name_write:
+        description: 'Environment Name Apply'
+        type: string
+        default: ''
+      dependent_environment:
+        description: 'Dependent Environment'
+        type: string
+        default: ''
+      backend_azure_storage_account_container_name:
+        description: 'Backend Azure Storage Account Container Name'
+        type: string
+        default: ''
+      root_module_folder_relative_path:
+        description: 'Root Module Folder Relative Path'
+        default: '.'
+        type: string
+      deployments_json:
+        description: 'JSON array of deployment stack configurations'
+        default: '[]'
+        type: string
+
+jobs:
+  validate:
+    name: Validate - ${{ matrix.deployment.name }}
+    runs-on:
+      ${{ inputs.runner_name }}
+    concurrency: ${{ inputs.backend_azure_storage_account_container_name }}-${{ matrix.deployment.name }}
+    environment: ${{ inputs.environment_name_read }}
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        deployment: ${{ fromJson(inputs.deployments_json) }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: What-If - ${{ matrix.deployment.name }}
+        shell: pwsh
+        run: |
+          $scope = "${{ matrix.deployment.scope }}"
+          if([string]::IsNullOrEmpty($scope)) { $scope = "group" }
+          $templateFile = "${{ inputs.root_module_folder_relative_path }}/${{ matrix.deployment.template_file }}"
+          $arguments = @("stack", $scope, "create", "--deny-settings-mode", "none", "--action-on-unmanage", "detachAll", "--yes")
+
+          switch($scope) {
+            "group" { $arguments += @("--resource-group", "${{ matrix.deployment.resource_group }}", "--name", "${{ matrix.deployment.name }}") }
+            "sub"   { $arguments += @("--location", "${{ matrix.deployment.location }}", "--name", "${{ matrix.deployment.name }}") }
+            "mg"    { $arguments += @("--location", "${{ matrix.deployment.location }}", "--management-group-id", "${{ matrix.deployment.management_group_id }}", "--name", "${{ matrix.deployment.name }}") }
+          }
+
+          $arguments += @("--template-file", $templateFile)
+          $paramsFile = "${{ matrix.deployment.parameters_file }}"
+          if(-not [string]::IsNullOrEmpty($paramsFile)) {
+            $arguments += @("--parameters", "@${{ inputs.root_module_folder_relative_path }}/$paramsFile")
+          }
+          $arguments += "--what-if"
+          Write-Host "Running: az $arguments"
+          az @arguments
+          if($LASTEXITCODE -ne 0) { throw "What-If failed for: ${{ matrix.deployment.name }}" }
