@@ -1,0 +1,31 @@
+---
+name: Plan Storage Contract Tests
+
+on:
+  pull_request:
+    paths:
+      - 'workflows/terraform/templates/workflows/ci-template.yaml'
+      - 'workflows/terraform/templates/workflows/cd-template.yaml'
+      - 'tests/contract/Test-PipelinePlanStorage.ps1'
+      - '.github/workflows/plan-storage-contract.yml'
+  workflow_dispatch:
+
+jobs:
+  contract:
+    name: Verify plan storage pipeline contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install powershell-yaml
+        shell: pwsh
+        run: |
+          Install-Module -Name powershell-yaml -Scope CurrentUser -Force -Repository PSGallery
+
+      - name: Run contract tests
+        shell: pwsh
+        run: |
+          ./tests/contract/Test-PipelinePlanStorage.ps1

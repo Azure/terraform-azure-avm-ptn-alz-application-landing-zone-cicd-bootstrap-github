@@ -28,11 +28,24 @@ This Azure Verified Module (AVM) pattern module bootstraps a complete, opinionat
 
 ### Azure resources
 
-- **Terraform state** — when `deployment_mode = "terraform"`, provisions a hardened storage account (private endpoint, no public access) for Terraform remote state per environment.
+- **Terraform state & plan storage** — when `deployment_mode = "terraform"`, provisions a hardened storage account (private endpoint, no public access) for Terraform remote state per environment, and, when `use_storage_account_for_plan = true` (the default), a dedicated `<env>-tfplan` container per environment for secure plan hand-off between the CD `plan` and `apply` jobs.
 - **Networking** — provisions a virtual network with dedicated subnets for runners and private endpoints, or accepts a pre-existing VNet / subnets in BYO mode.
 - **Private DNS** — manages private DNS zones for private endpoints, with an opt-out (`azure_alz_platform_landing_zone_mode_enabled`) for ALZ platforms that manage DNS centrally via Azure Policy.
 - **Identity** — creates the per-environment UAMIs used as the federation principals for each GitHub environment.
 - **Resource groups** — creates dedicated resource groups for identity, state, runners, and networking (or reuses an existing VNet's resource group in BYO mode).
+
+### Secure Terraform plan hand-off
+
+- **Default-secure** — `use_storage_account_for_plan = true` by default. The CD `plan` job uploads the binary plan to a per-environment Blob container (`<env>-tfplan`) instead of bundling it into the GitHub Actions artifact; the `apply` job downloads the exact same blob by run ID and deletes it after a successful apply.
+- **Legacy fallback** — set `use_storage_account_for_plan = false` to revert to shipping the plan inside the GitHub Actions build artifact. This is less secure (plan contents can include sensitive values and are retained per your org's Actions artifact retention policy) and is provided only for compatibility with self-managed/BYO template repos that haven't adopted the new templates.
+- **Custom template repositories are not auto-secured** — if you set `github_existing_template_repository_name` or a custom `github_workflow_folder_path`, the module does not modify your workflow YAML. You must adopt the upload/download/delete steps yourself for storage-backed hand-off to apply.
+- **`show_plan_in_pipeline_logs`** — defaults to `false`. Enabling it prints the full plan to the pipeline log, visible to anyone with read access to the repo/Actions runs. Only enable if your organization has explicitly accepted that exposure.
+- **`plan_storage_retention_days`** (default `7`) — a storage lifecycle policy rule deletes abandoned plan blobs, snapshots, and previous versions after this many days. This is a backstop only; successful applies delete their own plan blob immediately.
+- **Recoverability** — the plan container inherits the storage account's blob versioning/soft-delete settings, so an accidentally-deleted plan blob may still be recoverable within your soft-delete window.
+- **Trusted-admin threat boundary** — this feature keeps plan contents out of GitHub Actions artifact storage. It does not protect against an Azure user with Storage Blob Data Contributor/Owner-equivalent access to the storage account — the same trust boundary as Terraform remote state.
+- **Stale/concurrent plans** — the `apply` job always downloads the blob written by its own `plan` job run (keyed by run ID), never "the latest" blob, so a concurrent or superseded run cannot apply a stranger's plan.
+- **Non-retroactive upgrade** — enabling this on an existing deployment only takes effect for the next `plan`/`apply` cycle; it does not migrate plans already in flight.
+- **Upgrading an existing storage account** — `storage_management_policy_rule` replaces the account's *entire* lifecycle policy, not just this module's rules. If you already manage that storage account's lifecycle policy outside this module, applying this upgrade will silently overwrite those rules. Before upgrading, check existing rules with `az storage account management-policy show` and fold them into your Terraform config first.
 
 ## Authentication required to use the module
 
@@ -88,6 +101,9 @@ The following resources are used by this module:
 - [github_actions_environment_variable.backend_azure_storage_account_container_name](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
 - [github_actions_environment_variable.backend_azure_storage_account_name](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
 - [github_actions_environment_variable.bicep_deployments](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
+- [github_actions_environment_variable.plan_storage_container_name](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
+- [github_actions_environment_variable.show_plan_in_pipeline_logs](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
+- [github_actions_environment_variable.use_storage_account_for_plan](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
 - [github_actions_environment_variable.var_file](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
 - [github_actions_repository_access_level.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_repository_access_level) (resource)
 - [github_actions_repository_oidc_subject_claim_customization_template.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_repository_oidc_subject_claim_customization_template) (resource)
@@ -107,6 +123,7 @@ The following resources are used by this module:
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_string.unique_name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
+- [terraform_data.plan_storage_container_validation](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_resource_action.subscription](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
@@ -408,6 +425,14 @@ map(object({
 
 Default: `null`
 
+### <a name="input_plan_storage_retention_days"></a> [plan\_storage\_retention\_days](#input\_plan\_storage\_retention\_days)
+
+Description: The number of days after which abandoned Terraform plan base blobs, snapshots, and previous versions are eligible for lifecycle deletion.
+
+Type: `number`
+
+Default: `7`
+
 ### <a name="input_resource_name_environment"></a> [resource\_name\_environment](#input\_resource\_name\_environment)
 
 Description: The name segment for the management environment (used for naming Azure infrastructure resources, not deployment environments).
@@ -537,6 +562,14 @@ Type: `bool`
 
 Default: `true`
 
+### <a name="input_show_plan_in_pipeline_logs"></a> [show\_plan\_in\_pipeline\_logs](#input\_show\_plan\_in\_pipeline\_logs)
+
+Description: Whether to print the full Terraform plan in pipeline logs. Enabling this can expose sensitive values.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_tags"></a> [tags](#input\_tags)
 
 Description: (Optional) Tags of the resource.
@@ -544,6 +577,14 @@ Description: (Optional) Tags of the resource.
 Type: `map(string)`
 
 Default: `null`
+
+### <a name="input_use_storage_account_for_plan"></a> [use\_storage\_account\_for\_plan](#input\_use\_storage\_account\_for\_plan)
+
+Description: Whether to use the Terraform state Storage Account for secure plan hand-off. Set to false to use the legacy CI/CD artifact hand-off.
+
+Type: `bool`
+
+Default: `true`
 
 ## Outputs
 
