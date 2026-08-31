@@ -235,6 +235,32 @@ Assert-Contract -Condition ($deleteStep['run'] -match 'if\s*\(-not\s*\$deleted\)
 Assert-Contract -Condition ("$($deleteStep['if'])" -match 'success\(\)') `
     -Description "The delete step only runs after a successful apply (never deletes the plan after a failed apply)."
 
+# --- 12. Failed-plan output is redacted unless explicitly enabled ---
+Write-Host "`n-- Failed-plan log output respects SHOW_PLAN_IN_PIPELINE_LOGS --"
+foreach ($fileInfo in @(
+        @{ Name = 'ci-template.yaml'; Raw = $ciRaw },
+        @{ Name = 'cd-template.yaml'; Raw = $cdRaw }
+    )) {
+    $failureBlockMatch = [regex]::Match($fileInfo.Raw, '(?s)if\s*\(\$planExitCode\s*-ne\s*0\)\s*\{.*?throw\s*"Terraform plan failed with exit code \$planExitCode\."')
+    Assert-Contract -Condition $failureBlockMatch.Success `
+        -Description "$($fileInfo.Name): the failed-plan branch was found for inspection."
+    if ($failureBlockMatch.Success) {
+        $parts = $failureBlockMatch.Value -split '\}\s*else\s*\{', 2
+        Assert-Contract -Condition ($parts.Count -eq 2) `
+            -Description "$($fileInfo.Name): the failed-plan branch checks SHOW_PLAN_IN_PIPELINE_LOGS and has two paths."
+        if ($parts.Count -eq 2) {
+            $shownBranch = $parts[0]
+            $redactedBranch = $parts[1]
+            Assert-Contract -Condition ($shownBranch -match 'Get-Content -Path \$planLogFile \| Write-Host') `
+                -Description "$($fileInfo.Name): the full captured plan log is only ever dumped inside the SHOW_PLAN_IN_PIPELINE_LOGS branch."
+            Assert-Contract -Condition ($redactedBranch -match 'diagnosticBlocks') `
+                -Description "$($fileInfo.Name): when the flag is not true, only Terraform's own diagnostic block(s) are extracted from the log."
+            Assert-Contract -Condition ($redactedBranch -notmatch 'Get-Content -Path \$planLogFile \| Write-Host') `
+                -Description "$($fileInfo.Name): the redacted branch never falls back to dumping the entire raw captured log."
+        }
+    }
+}
+
 # --- Summary ---
 Write-Host "`n=== Summary: $($script:passCount) passed, $($script:failures.Count) failed ===" -ForegroundColor Cyan
 if ($script:failures.Count -gt 0) {

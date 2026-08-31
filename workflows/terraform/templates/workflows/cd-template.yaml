@@ -138,7 +138,24 @@ jobs:
           $planExitCode = $LASTEXITCODE
 
           if ($planExitCode -ne 0) {
-            Get-Content -Path $planLogFile | Write-Host
+            # A failed plan can still have streamed resource attribute values to the log before
+            # the error occurred. Only print the full captured output when the pipeline is
+            # explicitly configured to show plan content; otherwise print just Terraform's own
+            # diagnostic block(s) (its boxed "Error:"/"Warning:" sections), never the resource diff.
+            $showPlanInPipelineLogs = "${{ vars.SHOW_PLAN_IN_PIPELINE_LOGS }}" -eq 'true'
+            if ($showPlanInPipelineLogs) {
+              Get-Content -Path $planLogFile | Write-Host
+            } else {
+              $logContent = Get-Content -Path $planLogFile -Raw
+              $diagnosticBlocks = [regex]::Matches($logContent, "(?ms)^\u2577.*?^\u2575")
+              if ($diagnosticBlocks.Count -gt 0) {
+                foreach ($block in $diagnosticBlocks) {
+                  Write-Host $block.Value
+                }
+              } else {
+                Write-Host "Terraform plan failed. Set SHOW_PLAN_IN_PIPELINE_LOGS to true on this environment to see full plan output for troubleshooting."
+              }
+            }
             throw "Terraform plan failed with exit code $planExitCode."
           }
 
