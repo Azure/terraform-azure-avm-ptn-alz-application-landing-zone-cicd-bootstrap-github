@@ -24,7 +24,7 @@ locals {
     user_assigned_managed_identity_id = module.user_assigned_managed_identity[env_key].resource_id
     subject                           = "repository_owner_id:${data.github_organization.this.id}:repository_id:${github_repository.this[0].repo_id}:environment:${env_key}"
   } if length(env_value.required_templates) == 0 } : {}
-  template_claim_structure = "${data.github_organization.this.login}/${local.effective_template_repo_name}/.github/workflows/%s@refs/heads/main"
+  template_claim_structure = "${data.github_organization.this.login}/${local.effective_template_repo_name}/%s@refs/heads/main"
 }
 
 resource "azapi_resource" "federated_identity_credential" {
