@@ -44,16 +44,15 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
-  github_organization_name = var.github_organization_name
-  location                 = var.location
-  deployment_mode          = "bicep"
-  enable_telemetry         = var.enable_telemetry
-  example_module_path      = "${path.root}/../../example-repos/bicep"
-  runner_compute_type      = "azure_container_app"
-  runner_use_self_hosted   = true
-  resource_name_workload   = random_string.workload.result
-
+  github_organization_name   = var.github_organization_name
+  location                   = var.location
+  deployment_mode            = "bicep"
+  enable_telemetry           = var.enable_telemetry
+  example_module_path        = "${path.root}/../../example-repos/bicep"
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id
   github_app_key             = var.github_app_key
+  resource_name_workload     = random_string.workload.result
+  runner_compute_type        = "azure_container_app"
+  runner_use_self_hosted     = true
 }

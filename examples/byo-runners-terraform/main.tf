@@ -43,16 +43,15 @@ module "seed" {
   github_organization_name          = var.github_organization_name
   location                          = var.location
   enable_telemetry                  = var.enable_telemetry
+  github_app_id                     = var.github_app_id
+  github_app_installation_id        = var.github_app_installation_id
+  github_app_key                    = var.github_app_key
   github_create_main_repository     = false
   github_create_template_repository = false
   resource_name_environment         = local.seed_environment
   resource_name_workload            = local.seed_workload
-  runner_create_group               = true
   runner_container_instance_count   = 1
-
-  github_app_id              = var.github_app_id
-  github_app_installation_id = var.github_app_installation_id
-  github_app_key             = var.github_app_key
+  runner_create_group               = true
 }
 
 # BYO deployment: consume the runner group from the seed module.
@@ -63,12 +62,11 @@ module "test" {
   location                        = var.location
   enable_telemetry                = var.enable_telemetry
   example_module_path             = "${path.root}/../../example-repos/terraform"
+  github_app_id                   = var.github_app_id
+  github_app_installation_id      = var.github_app_installation_id
+  github_app_key                  = var.github_app_key
   resource_name_environment       = local.byo_environment
   resource_name_workload          = local.byo_workload
-  runner_existing_group_name      = module.seed.runner_group_name
   runner_container_instance_count = 1
-
-  github_app_id              = var.github_app_id
-  github_app_installation_id = var.github_app_installation_id
-  github_app_key             = var.github_app_key
+  runner_existing_group_name      = module.seed.runner_group_name
 }
