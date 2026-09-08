@@ -50,7 +50,7 @@ module "test" {
   example_module_path        = "${path.root}/../../example-repos/terraform"
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id
-  github_app_key             = var.github_app_key
+  github_app_key             = replace(replace(var.github_app_key, "\\r\\n", "\r\n"), "\\n", "\n")
   resource_name_workload     = random_string.workload.result
   runner_compute_type        = "azure_container_instance"
   runner_use_self_hosted     = true
