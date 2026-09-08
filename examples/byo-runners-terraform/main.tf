@@ -45,7 +45,7 @@ module "seed" {
   enable_telemetry                  = var.enable_telemetry
   github_app_id                     = var.github_app_id
   github_app_installation_id        = var.github_app_installation_id
-  github_app_key                    = replace(replace(var.github_app_key, "\\r\\n", "\r\n"), "\\n", "\n")
+  github_app_key                    = var.github_app_key == null ? null : replace(replace(var.github_app_key, "\\r\\n", "\r\n"), "\\n", "\n")
   github_create_main_repository     = false
   github_create_template_repository = false
   resource_name_environment         = local.seed_environment
@@ -64,7 +64,7 @@ module "test" {
   example_module_path             = "${path.root}/../../example-repos/terraform"
   github_app_id                   = var.github_app_id
   github_app_installation_id      = var.github_app_installation_id
-  github_app_key                  = replace(replace(var.github_app_key, "\\r\\n", "\r\n"), "\\n", "\n")
+  github_app_key                  = var.github_app_key == null ? null : replace(replace(var.github_app_key, "\\r\\n", "\r\n"), "\\n", "\n")
   resource_name_environment       = local.byo_environment
   resource_name_workload          = local.byo_workload
   runner_container_instance_count = 1
