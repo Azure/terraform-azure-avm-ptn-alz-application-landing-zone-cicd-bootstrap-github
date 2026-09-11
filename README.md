@@ -585,7 +585,7 @@ The following Modules are called:
 
 Source: Azure/avm-ptn-cicd-agents-and-runners/azurerm
 
-Version: 0.6.0
+Version: 0.6.2
 
 ### <a name="module_ip_addresses"></a> [ip\_addresses](#module\_ip\_addresses)
 
