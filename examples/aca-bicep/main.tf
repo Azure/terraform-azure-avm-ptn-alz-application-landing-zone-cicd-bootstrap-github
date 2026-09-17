@@ -47,7 +47,7 @@ module "test" {
   github_organization_name   = var.github_organization_name
   location                   = var.location
   deployment_mode            = "bicep"
-  enable_telemetry           = var.enable_telemetry
+  enable_telemetry           = false
   example_module_path        = "${path.root}/../../example-repos/bicep"
   github_app_id              = var.github_app_id
   github_app_installation_id = var.github_app_installation_id
