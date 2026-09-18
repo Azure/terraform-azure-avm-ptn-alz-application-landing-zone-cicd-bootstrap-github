@@ -42,7 +42,7 @@ module "seed" {
 
   github_organization_name          = var.github_organization_name
   location                          = var.location
-  enable_telemetry                  = false
+  enable_telemetry                  = var.enable_telemetry
   github_app_id                     = var.github_app_id
   github_app_installation_id        = var.github_app_installation_id
   github_app_key                    = var.github_app_key == null ? null : replace(replace(var.github_app_key, "\\r\\n", "\r\n"), "\\n", "\n")
@@ -60,7 +60,7 @@ module "test" {
 
   github_organization_name        = var.github_organization_name
   location                        = var.location
-  enable_telemetry                = false
+  enable_telemetry                = var.enable_telemetry
   example_module_path             = "${path.root}/../../example-repos/terraform"
   github_app_id                   = var.github_app_id
   github_app_installation_id      = var.github_app_installation_id

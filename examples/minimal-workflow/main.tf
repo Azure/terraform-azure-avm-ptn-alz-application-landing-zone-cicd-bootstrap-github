@@ -53,7 +53,7 @@ module "test" {
   github_organization_name = var.github_organization_name
   location                 = var.location
   deployment_mode          = "other"
-  enable_telemetry         = false
+  enable_telemetry         = var.enable_telemetry
   environments = {
     dev = {
       display_order   = 1
