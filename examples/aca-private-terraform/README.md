@@ -106,7 +106,7 @@ If it is set to false, then no telemetry will be collected.
 
 Type: `bool`
 
-Default: `false`
+Default: `true`
 
 ### <a name="input_github_app_id"></a> [github\_app\_id](#input\_github\_app\_id)
 
