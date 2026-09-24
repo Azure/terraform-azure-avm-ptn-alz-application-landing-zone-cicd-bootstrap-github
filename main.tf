@@ -83,3 +83,30 @@ resource "github_actions_environment_variable" "bicep_deployments" {
   variable_name = "BICEP_DEPLOYMENTS"
   value         = var.bicep_deployments != null ? jsonencode(var.bicep_deployments) : "[]"
 }
+
+resource "github_actions_environment_variable" "use_storage_account_for_plan" {
+  for_each = local.create_main_repository && var.deployment_mode == "terraform" ? local.environment_split : {}
+
+  repository    = github_repository.this[0].name
+  environment   = github_repository_environment.this[each.key].environment
+  variable_name = "USE_STORAGE_ACCOUNT_FOR_PLAN"
+  value         = tostring(var.use_storage_account_for_plan)
+}
+
+resource "github_actions_environment_variable" "show_plan_in_pipeline_logs" {
+  for_each = local.create_main_repository && var.deployment_mode == "terraform" ? local.environment_split : {}
+
+  repository    = github_repository.this[0].name
+  environment   = github_repository_environment.this[each.key].environment
+  variable_name = "SHOW_PLAN_IN_PIPELINE_LOGS"
+  value         = tostring(var.show_plan_in_pipeline_logs)
+}
+
+resource "github_actions_environment_variable" "plan_storage_container_name" {
+  for_each = local.create_main_repository && var.deployment_mode == "terraform" && var.use_storage_account_for_plan ? local.environment_split : {}
+
+  repository    = github_repository.this[0].name
+  environment   = github_repository_environment.this[each.key].environment
+  variable_name = "PLAN_STORAGE_CONTAINER_NAME"
+  value         = local.plan_storage_container_names[each.value.environment]
+}
