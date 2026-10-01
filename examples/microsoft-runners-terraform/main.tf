@@ -48,6 +48,6 @@ module "test" {
   location                 = var.location
   enable_telemetry         = var.enable_telemetry
   example_module_path      = "${path.root}/../../example-repos/terraform"
-  runner_use_self_hosted   = false
   resource_name_workload   = random_string.workload.result
+  runner_use_self_hosted   = false
 }

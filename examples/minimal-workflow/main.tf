@@ -53,6 +53,7 @@ module "test" {
   github_organization_name = var.github_organization_name
   location                 = var.location
   deployment_mode          = "other"
+  enable_telemetry         = var.enable_telemetry
   environments = {
     dev = {
       display_order   = 1
@@ -72,6 +73,6 @@ module "test" {
       template_path = ".github/workflows/info-template.yaml"
     }
   }
-  runner_use_self_hosted = false
   resource_name_workload = random_string.workload.result
+  runner_use_self_hosted = false
 }
