@@ -66,6 +66,17 @@ jobs:
           terraform_wrapper: false
           terraform_version: ${{ inputs.terraform_cli_versions }}
 
+      - name: Prepare Plan Working Directory
+        id: plan_paths
+        shell: pwsh
+        run: |
+          $planDir = Join-Path $env:RUNNER_TEMP "plan-${{ github.run_id }}-${{ github.run_attempt }}"
+          if (Test-Path -Path $planDir) {
+            Remove-Item -Path $planDir -Recurse -Force
+          }
+          New-Item -Path $planDir -ItemType Directory -Force | Out-Null
+          "plan_dir=$planDir" >> $env:GITHUB_OUTPUT
+
       - name: Terraform Init
         shell: pwsh
         run: |
@@ -89,6 +100,8 @@ jobs:
 
           $varFilePath = "${{ vars.VAR_FILE_PATH }}"
           $action = "${{ inputs.terraform_action }}"
+          $planFile = Join-Path "${{ steps.plan_paths.outputs.plan_dir }}" "tfplan"
+          $planLogFile = Join-Path "${{ steps.plan_paths.outputs.plan_dir }}" "tfplan.log"
 
           # Run Terraform Plan
           $command = "terraform"
@@ -100,7 +113,7 @@ jobs:
             $arguments += "-var-file=$varFilePath"
           }
 
-          $arguments += "-out=tfplan"
+          $arguments += "-out=$planFile"
           $arguments += "-input=false"
 
           if ($action -eq 'destroy') {
@@ -108,13 +121,42 @@ jobs:
           }
 
           Write-Host "Running: $command $arguments"
-          & $command $arguments
+          & $command $arguments *> $planLogFile
+          $planExitCode = $LASTEXITCODE
+
+          if ($planExitCode -ne 0) {
+            # A failed plan can still have streamed resource attribute values to the log before
+            # the error occurred. Only print the full captured output when the pipeline is
+            # explicitly configured to show plan content; otherwise print just Terraform's own
+            # diagnostic block(s) (its boxed "Error:"/"Warning:" sections), never the resource diff.
+            $showPlanInPipelineLogs = "${{ vars.SHOW_PLAN_IN_PIPELINE_LOGS }}" -eq 'true'
+            if ($showPlanInPipelineLogs) {
+              Get-Content -Path $planLogFile | Write-Host
+            } else {
+              $logContent = Get-Content -Path $planLogFile -Raw
+              $diagnosticBlocks = [regex]::Matches($logContent, "(?ms)^\u2577.*?^\u2575")
+              if ($diagnosticBlocks.Count -gt 0) {
+                foreach ($block in $diagnosticBlocks) {
+                  Write-Host $block.Value
+                }
+              } else {
+                Write-Host "Terraform plan failed. Set SHOW_PLAN_IN_PIPELINE_LOGS to true on this environment to see full plan output for troubleshooting."
+              }
+            }
+            throw "Terraform plan failed with exit code $planExitCode."
+          }
+
+          if ("${{ vars.SHOW_PLAN_IN_PIPELINE_LOGS }}" -eq 'true') {
+            Get-Content -Path $planLogFile | Write-Host
+          }
 
       - name: Terraform Plan Summary
         shell: pwsh
         run: |
-          terraform -chdir="${{inputs.root_module_folder_relative_path}}" show -json tfplan > tfplan.json
-          $planJson = Get-Content -Raw tfplan.json
+          $planFile = Join-Path "${{ steps.plan_paths.outputs.plan_dir }}" "tfplan"
+          $planJsonFile = Join-Path "${{ steps.plan_paths.outputs.plan_dir }}" "tfplan.json"
+          terraform -chdir="${{inputs.root_module_folder_relative_path}}" show -json $planFile > $planJsonFile
+          $planJson = Get-Content -Raw $planJsonFile
           $planObject = ConvertFrom-Json $planJson -Depth 100
 
           $items = @{}
@@ -129,8 +171,11 @@ jobs:
           Write-Host "Plan Summary"
           Write-Host (ConvertTo-Json $items -Depth 10)
 
-      - name: Publish Plan Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: 'plan_${{ inputs.name }}'
-          path: ./tfplan.json
+      - name: Clean Up Plan Working Directory
+        if: always()
+        shell: pwsh
+        run: |
+          $planDir = "${{ steps.plan_paths.outputs.plan_dir }}"
+          if (-not [string]::IsNullOrEmpty($planDir) -and (Test-Path -Path $planDir)) {
+            Remove-Item -Path $planDir -Recurse -Force
+          }
