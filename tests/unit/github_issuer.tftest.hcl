@@ -156,3 +156,20 @@ run "rejects_multi_label_ghe_domain" {
 
   expect_failures = [var.github_organization_domain_name]
 }
+
+run "rejects_non_ghe_domain" {
+  command = plan
+  providers = {
+    azapi   = azapi.test
+    azurerm = azurerm.test
+    github  = github.mock
+    modtm   = modtm.mock
+    random  = random.mock
+  }
+
+  variables {
+    github_organization_domain_name = "example.com"
+  }
+
+  expect_failures = [var.github_organization_domain_name]
+}
