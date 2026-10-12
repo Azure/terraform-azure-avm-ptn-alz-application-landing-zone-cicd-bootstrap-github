@@ -42,7 +42,7 @@ variable "github_organization_domain_name" {
   nullable    = false
 
   validation {
-    condition     = var.github_organization_domain_name == "github.com" || can(regex("^([A-Za-z0-9][A-Za-z0-9-]*\\.)+ghe\\.com$", var.github_organization_domain_name))
+    condition     = var.github_organization_domain_name == "github.com" || can(regex("^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.ghe\\.com$", var.github_organization_domain_name))
     error_message = "github_organization_domain_name must be 'github.com' or a GHE.com enterprise subdomain such as 'contoso.ghe.com'."
   }
 }

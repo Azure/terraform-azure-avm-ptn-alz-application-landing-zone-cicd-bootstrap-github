@@ -58,7 +58,7 @@ If you set `runner_create_group = true` the token's organization must be on a **
 
 ### GitHub Enterprise Cloud with data residency
 
-Set `github_organization_domain_name` to your enterprise subdomain, for example `contoso.ghe.com`. Configure the GitHub provider in the calling configuration to use the matching API endpoint:
+Set `github_organization_domain_name` to your enterprise subdomain, for example `contoso.ghe.com`. Configure the GitHub provider in the calling configuration to use its matching API endpoint. For `contoso.ghe.com`, set `base_url` to `https://api.contoso.ghe.com/`:
 
 ```terraform
 provider "github" {

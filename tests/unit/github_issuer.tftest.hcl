@@ -139,3 +139,20 @@ run "ghe_com_issuer" {
     error_message = "A GHE.com organization domain must select its dedicated Actions issuer."
   }
 }
+
+run "rejects_multi_label_ghe_domain" {
+  command = plan
+  providers = {
+    azapi   = azapi.test
+    azurerm = azurerm.test
+    github  = github.mock
+    modtm   = modtm.mock
+    random  = random.mock
+  }
+
+  variables {
+    github_organization_domain_name = "a.b.ghe.com"
+  }
+
+  expect_failures = [var.github_organization_domain_name]
+}
