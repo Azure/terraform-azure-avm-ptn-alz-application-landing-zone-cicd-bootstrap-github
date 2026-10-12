@@ -54,6 +54,19 @@ If you set `runner_create_group = true` the token's organization must be on a **
 
 `GITHUB_OWNER` should match `var.github_organization_name`.
 
+### GitHub Enterprise Cloud with data residency
+
+Set `github_organization_domain_name` to your enterprise subdomain, for example `contoso.ghe.com`. Configure the GitHub provider in the calling configuration to use the matching API endpoint:
+
+```terraform
+provider "github" {
+  owner    = var.github_organization_name
+  base_url = "https://api.${var.github_organization_domain_name}/"
+}
+```
+
+The module uses the matching GitHub Actions OIDC issuer for Azure federated credentials. The default `github.com` domain preserves the existing GitHub.com issuer and API endpoint behavior.
+
 ### Legacy PAT (optional)
 
 The only remaining token *input variable* is `var.runner_personal_access_token`, which is **only consumed when `var.runner_authentication_method = "pat"`** to register the self-hosted runners. With the default GitHub App authentication method this variable can be left `null`.

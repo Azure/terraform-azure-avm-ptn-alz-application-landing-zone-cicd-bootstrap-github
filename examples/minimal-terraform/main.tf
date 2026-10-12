@@ -30,7 +30,8 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = var.github_organization_name
+  owner    = var.github_organization_name
+  base_url = "https://api.${var.github_organization_domain_name}/"
 }
 
 resource "random_string" "workload" {
@@ -44,10 +45,11 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
-  github_organization_name = var.github_organization_name
-  location                 = var.location
-  enable_telemetry         = var.enable_telemetry
-  example_module_path      = "${path.root}/../../example-repos/terraform"
-  resource_name_workload   = random_string.workload.result
-  runner_use_self_hosted   = false
+  github_organization_name        = var.github_organization_name
+  location                        = var.location
+  enable_telemetry                = var.enable_telemetry
+  example_module_path             = "${path.root}/../../example-repos/terraform"
+  github_organization_domain_name = var.github_organization_domain_name
+  resource_name_workload          = random_string.workload.result
+  runner_use_self_hosted          = false
 }

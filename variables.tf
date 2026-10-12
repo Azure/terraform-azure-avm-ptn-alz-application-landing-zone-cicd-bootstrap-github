@@ -35,6 +35,18 @@ DESCRIPTION
   nullable    = false
 }
 
+variable "github_organization_domain_name" {
+  type        = string
+  default     = "github.com"
+  description = "The domain of the GitHub organization. Use `github.com` for GitHub.com or an enterprise subdomain ending in `.ghe.com` for GitHub Enterprise Cloud with data residency. Configure the GitHub provider API base URL in the calling configuration for GHE.com."
+  nullable    = false
+
+  validation {
+    condition     = var.github_organization_domain_name == "github.com" || can(regex("^([A-Za-z0-9][A-Za-z0-9-]*\\.)+ghe\\.com$", var.github_organization_domain_name))
+    error_message = "github_organization_domain_name must be 'github.com' or a GHE.com enterprise subdomain such as 'contoso.ghe.com'."
+  }
+}
+
 variable "runner_personal_access_token" {
   type        = string
   default     = null
