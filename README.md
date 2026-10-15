@@ -58,7 +58,12 @@ If you set `runner_create_group = true` the token's organization must be on a **
 
 ### GitHub Enterprise Cloud with data residency
 
-Set `github_organization_domain_name` to your enterprise subdomain, for example `contoso.ghe.com`. Configure the GitHub provider in the calling configuration to use its matching API endpoint. For `contoso.ghe.com`, set `base_url` to `https://api.contoso.ghe.com/`:
+Set `github_organization_domain_name` to your enterprise subdomain, for example `contoso.ghe.com`.
+
+- Supported on GHE.com: GitHub-hosted runners with `runner_use_self_hosted = false`, and bring-your-own (BYO) runner groups already registered to your GHE.com organization with `runner_existing_group_name` set to the existing group.
+- Not yet supported on GHE.com: module-created Azure Container Apps (ACA) and Azure Container Instances (ACI) self-hosted runners. Use GitHub-hosted runners or an existing BYO runner group instead.
+
+Configure the GitHub provider in the calling configuration with `base_url = "https://api.<domain>/"`, where `<domain>` is your enterprise domain. The module does not contain a provider block. For `contoso.ghe.com`, use `https://api.contoso.ghe.com/`:
 
 ```terraform
 provider "github" {
@@ -67,7 +72,11 @@ provider "github" {
 }
 ```
 
-The module uses the matching GitHub Actions OIDC issuer for Azure federated credentials. The default `github.com` domain preserves the existing GitHub.com issuer and API endpoint behavior.
+On GHE.com, the repositories managed by this module are created as private repositories (the module creates public repositories only for GitHub Free organizations). Your enterprise must allow private repository creation; the module never switches repository visibility to internal.
+
+The workflows require outbound egress to public GitHub Actions and Terraform downloads, even when your organization is hosted on GHE.com. Allow this access from the runners executing the workflows.
+
+Only the default, non-customized GitHub Actions OIDC issuer is supported: `https://token.actions.<subdomain>.ghe.com`, for example `https://token.actions.contoso.ghe.com`. Enterprise-customized OIDC issuer URLs are not supported. The module uses this issuer for Azure federated credentials. The default `github.com` domain preserves the existing GitHub.com issuer and API endpoint behavior.
 
 ### Legacy PAT (optional)
 
