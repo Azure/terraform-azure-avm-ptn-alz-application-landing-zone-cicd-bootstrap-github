@@ -405,6 +405,24 @@ map(object({
 
 Default: `null`
 
+### <a name="input_ignore_body_changes"></a> [ignore\_body\_changes](#input\_ignore\_body\_changes)
+
+Description: Body-relative dot-notation paths to ignore for the module's directly managed Azure resources. Ignored configuration is not sent to Azure until the path is removed. Changes take effect only after apply. Non-empty lists require Terraform 1.11 or later.
+
+- `authorization_role_assignments` - Paths ignored on role assignments for existing deployment scopes.
+- `managedidentity_user_assigned_identities_federated_identity_credentials` - Paths ignored on GitHub federated identity credentials.
+
+Type:
+
+```hcl
+object({
+    authorization_role_assignments                                          = optional(list(string), [])
+    managedidentity_user_assigned_identities_federated_identity_credentials = optional(list(string), [])
+  })
+```
+
+Default: `{}`
+
 ### <a name="input_resource_name_environment"></a> [resource\_name\_environment](#input\_resource\_name\_environment)
 
 Description: The name segment for the management environment (used for naming Azure infrastructure resources, not deployment environments).
@@ -469,6 +487,52 @@ Description: The name segment for the workload.
 Type: `string`
 
 Default: `"demg"`
+
+### <a name="input_resource_types"></a> [resource\_types](#input\_resource\_types)
+
+Description: Resource types and API versions for the module's directly managed Azure resources.
+
+- `authorization_role_assignments` - Type and API version for role assignments for existing deployment scopes.
+- `managedidentity_user_assigned_identities_federated_identity_credentials` - Type and API version for GitHub federated identity credentials.
+
+Type:
+
+```hcl
+object({
+    authorization_role_assignments                                          = optional(string, "Microsoft.Authorization/roleAssignments@2022-04-01")
+    managedidentity_user_assigned_identities_federated_identity_credentials = optional(string, "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31")
+  })
+```
+
+Default: `{}`
+
+### <a name="input_retry"></a> [retry](#input\_retry)
+
+Description: Retry configuration for the module's directly managed Azure resources. Defaults to retrying concurrent federated credential writes for a managed identity. Set to null to use provider defaults.
+
+- `error_message_regex` - Error patterns that trigger a retry.
+- `interval_seconds` - Initial retry interval in seconds.
+- `max_interval_seconds` - Maximum retry interval in seconds.
+
+Type:
+
+```hcl
+object({
+    error_message_regex  = optional(list(string))
+    interval_seconds     = optional(number)
+    max_interval_seconds = optional(number)
+  })
+```
+
+Default:
+
+```json
+{
+  "error_message_regex": [
+    "ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity"
+  ]
+}
+```
 
 ### <a name="input_runner_authentication_method"></a> [runner\_authentication\_method](#input\_runner\_authentication\_method)
 
@@ -539,6 +603,28 @@ Default: `true`
 Description: (Optional) Tags of the resource.
 
 Type: `map(string)`
+
+Default: `null`
+
+### <a name="input_timeouts"></a> [timeouts](#input\_timeouts)
+
+Description: Operation timeouts for the module's directly managed Azure resources. Defaults to provider timeouts. Values are duration strings such as `30m` or `1h`.
+
+- `create` - Timeout for create operations.
+- `read` - Timeout for read operations.
+- `update` - Timeout for update operations.
+- `delete` - Timeout for delete operations.
+
+Type:
+
+```hcl
+object({
+    create = optional(string)
+    read   = optional(string)
+    update = optional(string)
+    delete = optional(string)
+  })
+```
 
 Default: `null`
 
