@@ -84,8 +84,6 @@ The following requirements are needed by this module:
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.12)
 
-- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
-
 - <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
 
 ## Resources
@@ -94,6 +92,7 @@ The following resources are used by this module:
 
 - [azapi_resource.federated_identity_credential](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.role_assignment](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/resource) (resource)
 - [github_actions_environment_variable.additional_variables](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
 - [github_actions_environment_variable.azure_client_id](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
 - [github_actions_environment_variable.azure_subscription_id](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/actions_environment_variable) (resource)
@@ -120,15 +119,13 @@ The following resources are used by this module:
 - [github_team.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team) (resource)
 - [github_team_membership.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team_membership) (resource)
 - [github_team_repository.this](https://registry.terraform.io/providers/integrations/github/latest/docs/resources/team_repository) (resource)
-- [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_string.unique_name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) (resource)
-- [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [terraform_data.plan_storage_container_validation](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
+- [terraform_data.telemetry](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) (resource)
 - [azapi_client_config.current](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_resource_action.subscription](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_action) (data source)
 - [github_organization.this](https://registry.terraform.io/providers/integrations/github/latest/docs/data-sources/organization) (data source)
-- [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
