@@ -13,12 +13,6 @@ If it is set to false, then no telemetry will be collected.
 DESCRIPTION
 }
 
-variable "location" {
-  type        = string
-  default     = "uksouth"
-  description = "The location/region where the resources will be created."
-}
-
 variable "github_app_id" {
   type        = string
   default     = null
@@ -36,4 +30,10 @@ variable "github_app_key" {
   default     = null
   description = "The private key for GitHub App authentication."
   sensitive   = true
+}
+
+variable "location" {
+  type        = string
+  default     = "uksouth"
+  description = "The location/region where the resources will be created."
 }

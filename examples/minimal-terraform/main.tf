@@ -2,6 +2,10 @@ terraform {
   required_version = "~> 1.9"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.12"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
@@ -9,6 +13,10 @@ terraform {
     github = {
       source  = "integrations/github"
       version = "~> 6.11"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
     random = {
       source  = "hashicorp/random"
@@ -43,6 +51,10 @@ resource "random_string" "workload" {
 # This is the module call
 module "test" {
   source = "../../"
+  providers = {
+    azapi = azapi
+    modtm = modtm
+  }
 
   github_organization_name = var.github_organization_name
   location                 = var.location
