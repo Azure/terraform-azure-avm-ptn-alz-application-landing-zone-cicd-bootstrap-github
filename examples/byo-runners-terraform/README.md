@@ -9,6 +9,10 @@ terraform {
   required_version = "~> 1.9"
 
   required_providers {
+    azapi = {
+      source  = "Azure/azapi"
+      version = "~> 2.12"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
@@ -16,6 +20,10 @@ terraform {
     github = {
       source  = "integrations/github"
       version = "~> 6.11"
+    }
+    modtm = {
+      source  = "registry.terraform.io/azure/modtm"
+      version = "~> 0.3"
     }
   }
 }
@@ -46,6 +54,10 @@ locals {
 # Seed deployment: create self-hosted runner infrastructure including a runner group.
 module "seed" {
   source = "../../"
+  providers = {
+    azapi = azapi
+    modtm = modtm
+  }
 
   github_organization_name          = var.github_organization_name
   location                          = var.location
@@ -64,6 +76,10 @@ module "seed" {
 # BYO deployment: consume the runner group from the seed module.
 module "test" {
   source = "../../"
+  providers = {
+    azapi = azapi
+    modtm = modtm
+  }
 
   github_organization_name        = var.github_organization_name
   location                        = var.location
@@ -86,9 +102,13 @@ The following requirements are needed by this module:
 
 - <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.9)
 
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.12)
+
 - <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 4.0)
 
 - <a name="requirement_github"></a> [github](#requirement\_github) (~> 6.11)
+
+- <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
 ## Resources
 
