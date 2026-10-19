@@ -69,12 +69,25 @@ resource "azapi_resource" "role_assignment" {
 
   name      = uuidv5("url", "${each.value.scope}-${each.value.principal_id}-${each.value.role_definition_id_or_name}")
   parent_id = each.value.scope
-  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
+  type      = var.resource_types.authorization_role_assignments
   body = {
     properties = {
       principalId      = each.value.principal_id
       principalType    = "ServicePrincipal"
       roleDefinitionId = can(regex("^/", each.value.role_definition_id_or_name)) ? each.value.role_definition_id_or_name : "/subscriptions/${each.value.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${module.role_definitions.role_definition_rolename_to_name[each.value.role_definition_id_or_name]}"
+    }
+  }
+  ignore_body_changes    = length(var.ignore_body_changes.authorization_role_assignments) > 0 ? var.ignore_body_changes.authorization_role_assignments : null
+  response_export_values = []
+  retry                  = var.retry
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+    content {
+      create = timeouts.value.create
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
     }
   }
 }

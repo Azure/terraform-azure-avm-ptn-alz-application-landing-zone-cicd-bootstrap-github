@@ -33,7 +33,7 @@ resource "azapi_resource" "federated_identity_credential" {
 
   name      = each.value.federated_credential_name
   parent_id = each.value.user_assigned_managed_identity_id
-  type      = "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials@2023-01-31"
+  type      = var.resource_types.managedidentity_user_assigned_identities_federated_identity_credentials
   body = {
     properties = {
       audiences = [local.default_audience_name]
@@ -41,13 +41,17 @@ resource "azapi_resource" "federated_identity_credential" {
       subject   = each.value.subject
     }
   }
-  # Azure serialises federated identity credential writes per managed identity. This module creates
-  # multiple credentials per user-assigned identity (one per environment / workflow template), which
-  # Terraform applies in parallel, triggering a 409
-  # "ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity". Retry (with the provider's
-  # default backoff + randomisation, which desynchronises sibling writers) so the credentials serialise
-  # and eventually succeed without failing the run.
-  retry = {
-    error_message_regex = ["ConcurrentFederatedIdentityCredentialsWritesForSingleManagedIdentity"]
+  ignore_body_changes    = length(var.ignore_body_changes.managedidentity_user_assigned_identities_federated_identity_credentials) > 0 ? var.ignore_body_changes.managedidentity_user_assigned_identities_federated_identity_credentials : null
+  response_export_values = []
+  retry                  = var.retry
+
+  dynamic "timeouts" {
+    for_each = var.timeouts == null ? [] : [var.timeouts]
+    content {
+      create = timeouts.value.create
+      read   = timeouts.value.read
+      update = timeouts.value.update
+      delete = timeouts.value.delete
+    }
   }
 }
