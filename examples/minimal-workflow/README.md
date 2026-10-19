@@ -76,7 +76,10 @@ module "test" {
       scope           = "subscription"
       subscription_id = data.azapi_client_config.current.subscription_id
       identities = {
-        read = { enabled = false }
+        read = {
+          enabled               = false
+          allowed_template_keys = []
+        }
       }
     }
   }
