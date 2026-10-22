@@ -27,9 +27,8 @@ module "regions" {
 }
 
 module "role_definitions" {
-  source    = "Azure/avm-utl-roledefinitions/azure"
-  version   = "0.3.0"
-  providers = { modtm = modtm }
+  source  = "Azure/avm-utl-roledefinitions/azure"
+  version = "0.3.0"
 
   enable_telemetry = var.enable_telemetry
 }

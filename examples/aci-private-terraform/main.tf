@@ -2,6 +2,7 @@ terraform {
   required_version = "~> 1.9"
 
   required_providers {
+    # tflint-ignore: terraform_unused_required_providers
     azapi = {
       source  = "Azure/azapi"
       version = "~> 2.12"
@@ -14,6 +15,7 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.11"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
@@ -51,10 +53,6 @@ resource "random_string" "workload" {
 # ACI with private networking and Terraform workflows
 module "test" {
   source = "../../"
-  providers = {
-    azapi = azapi
-    modtm = modtm
-  }
 
   github_organization_name   = var.github_organization_name
   location                   = var.location

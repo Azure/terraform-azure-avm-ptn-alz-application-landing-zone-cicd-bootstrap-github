@@ -10,6 +10,7 @@ terraform {
       source  = "integrations/github"
       version = "~> 6.12"
     }
+    # tflint-ignore: terraform_unused_required_providers
     modtm = {
       source  = "registry.terraform.io/azure/modtm"
       version = "~> 0.3"
