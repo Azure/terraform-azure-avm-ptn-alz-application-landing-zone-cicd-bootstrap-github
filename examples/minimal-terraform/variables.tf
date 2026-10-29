@@ -3,6 +3,12 @@ variable "github_organization_name" {
   description = "The name of the GitHub organization."
 }
 
+variable "github_organization_domain_name" {
+  type        = string
+  default     = "github.com"
+  description = "The domain of the GitHub organization. Use `github.com` or an enterprise subdomain ending in `.ghe.com`."
+}
+
 variable "enable_telemetry" {
   type        = bool
   default     = true
