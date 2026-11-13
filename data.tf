@@ -20,7 +20,7 @@ data "github_organization" "this" {
 
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "0.13.0"
+  version = "0.13.2"
 
   location         = var.location
   enable_telemetry = var.enable_telemetry
@@ -28,7 +28,7 @@ module "regions" {
 
 module "role_definitions" {
   source  = "Azure/avm-utl-roledefinitions/azure"
-  version = "0.3.0"
+  version = "0.4.0"
 
   enable_telemetry = var.enable_telemetry
 }
