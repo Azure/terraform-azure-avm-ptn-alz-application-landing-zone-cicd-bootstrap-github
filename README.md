@@ -56,6 +56,28 @@ If you set `runner_create_group = true` the token's organization must be on a **
 
 `GITHUB_OWNER` should match `var.github_organization_name`.
 
+### GitHub Enterprise Cloud with data residency
+
+Set `github_organization_domain_name` to your enterprise subdomain, for example `contoso.ghe.com`.
+
+- Supported on GHE.com: GitHub-hosted runners with `runner_use_self_hosted = false`, and bring-your-own (BYO) runner groups already registered to your GHE.com organization with `runner_existing_group_name` set to the existing group.
+- Not yet supported on GHE.com: module-created Azure Container Apps (ACA) and Azure Container Instances (ACI) self-hosted runners. Use GitHub-hosted runners or an existing BYO runner group instead.
+
+Configure the GitHub provider in the calling configuration with `base_url = "https://api.<domain>/"`, where `<domain>` is your enterprise domain. The module does not contain a provider block. For `contoso.ghe.com`, use `https://api.contoso.ghe.com/`:
+
+```terraform
+provider "github" {
+  owner    = var.github_organization_name
+  base_url = "https://api.${var.github_organization_domain_name}/"
+}
+```
+
+On GHE.com, the repositories managed by this module are created as private repositories (the module creates public repositories only for GitHub Free organizations). Your enterprise must allow private repository creation; the module never switches repository visibility to internal.
+
+The workflows require outbound egress to public GitHub Actions and Terraform downloads, even when your organization is hosted on GHE.com. Allow this access from the runners executing the workflows.
+
+Only the default, non-customized GitHub Actions OIDC issuer is supported: `https://token.actions.<subdomain>.ghe.com`, for example `https://token.actions.contoso.ghe.com`. Enterprise-customized OIDC issuer URLs are not supported. The module uses this issuer for Azure federated credentials. The default `github.com` domain preserves the existing GitHub.com issuer and API endpoint behavior.
+
 ### Legacy PAT (optional)
 
 The only remaining token *input variable* is `var.runner_personal_access_token`, which is **only consumed when `var.runner_authentication_method = "pat"`** to register the self-hosted runners. With the default GitHub App authentication method this variable can be left `null`.
@@ -378,6 +400,14 @@ Description: The name of a pre-existing template repository containing CI/CD wor
 Type: `string`
 
 Default: `null`
+
+### <a name="input_github_organization_domain_name"></a> [github\_organization\_domain\_name](#input\_github\_organization\_domain\_name)
+
+Description: The domain of the GitHub organization. Use `github.com` for GitHub.com or an enterprise subdomain ending in `.ghe.com` for GitHub Enterprise Cloud with data residency. Configure the GitHub provider API base URL in the calling configuration for GHE.com.
+
+Type: `string`
+
+Default: `"github.com"`
 
 ### <a name="input_github_workflow_folder_path"></a> [github\_workflow\_folder\_path](#input\_github\_workflow\_folder\_path)
 

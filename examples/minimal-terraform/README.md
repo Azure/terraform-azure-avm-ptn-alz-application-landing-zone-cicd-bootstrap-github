@@ -47,7 +47,8 @@ provider "azurerm" {
 }
 
 provider "github" {
-  owner = var.github_organization_name
+  owner    = var.github_organization_name
+  base_url = "https://api.${var.github_organization_domain_name}/"
 }
 
 resource "random_string" "workload" {
@@ -61,12 +62,13 @@ resource "random_string" "workload" {
 module "test" {
   source = "../../"
 
-  github_organization_name = var.github_organization_name
-  location                 = var.location
-  enable_telemetry         = var.enable_telemetry
-  example_module_path      = "${path.root}/../../example-repos/terraform"
-  resource_name_workload   = random_string.workload.result
-  runner_use_self_hosted   = false
+  github_organization_name        = var.github_organization_name
+  location                        = var.location
+  enable_telemetry                = var.enable_telemetry
+  example_module_path             = "${path.root}/../../example-repos/terraform"
+  github_organization_domain_name = var.github_organization_domain_name
+  resource_name_workload          = random_string.workload.result
+  runner_use_self_hosted          = false
 }
 ```
 
@@ -117,6 +119,14 @@ If it is set to false, then no telemetry will be collected.
 Type: `bool`
 
 Default: `true`
+
+### <a name="input_github_organization_domain_name"></a> [github\_organization\_domain\_name](#input\_github\_organization\_domain\_name)
+
+Description: The domain of the GitHub organization. Use `github.com` or an enterprise subdomain ending in `.ghe.com`.
+
+Type: `string`
+
+Default: `"github.com"`
 
 ### <a name="input_location"></a> [location](#input\_location)
 
